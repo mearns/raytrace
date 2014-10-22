@@ -1,3 +1,16 @@
+# Vim files
+*.swp
+*.swo
+*.swn
+*.swm
+
+# Scons files
+.sconsign.dblite
+
+# Output dir
+/build
+/results
+
 # Object files
 *.o
 *.ko
