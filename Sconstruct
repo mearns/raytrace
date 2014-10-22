@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+# vim: set fileencoding=utf-8: set encoding=utf-8:
+
+import os
+
+env = Environment(
+    ENV = {
+        'PATH': os.environ['PATH'],
+        'TEMP' : os.environ.get('TEMP', os.environ.get('TMPDIR', './temp')),
+        'TMP' : os.environ.get('TMP', os.environ.get('TMPDIR', './temp')),
+    },
+    tools = [
+        'default',
+        'gcc',
+    ],
+)
+env.Append(CCFLAGS=' -Wall')
+env.VariantDir("build/", "src/")
+
+
+src_files = env.Glob('build/*.c')
+
+obj_files = env.Object(src_files)
+env.Alias('obj', obj_files)
+
+program = env.Program('main', obj_files)
+
+installed = env.Install('results/', program)
+env.Default(installed)
+env.Alias('prog', installed)
+
