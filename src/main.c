@@ -35,7 +35,6 @@ gboolean expose_event_callback (GtkWidget *widget, GdkEventExpose *event, gpoint
             pix[0] = i % 255; //red
             pix[1] = j % 255; //green
             pix[2] = 0; //blue;
-            printf("%d,%d\n", i, j);
         }
     }
 
@@ -73,11 +72,8 @@ int main(int argc, char **argv)
     printf("Area of triangle: %f\n", triangle->area);
     printf("Triangle at (%f, %f, %f) is [%d,%d,%d]\n", test_pt->x, test_pt->y, test_pt->z, test_color.r, test_color.g, test_color.b);
 
-    //GtkWidget *darea = gtk_drawing_area_new();
-    //gtk_widget_set_size_request(darea, WIDTH, HEIGHT);
     g_signal_connect(G_OBJECT(window), "expose_event", G_CALLBACK(expose_event_callback), NULL);
-
-    //gtk_container_add(GTK_CONTAINER(window), darea);
+    g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     /* Hand control over to the main loop. */
     gtk_main ();
