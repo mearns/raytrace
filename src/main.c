@@ -55,6 +55,13 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     Point_t *const step_right = Point_scale(Point(0,0,0), right, 1.0 / ((double)(width) * 0.5));
     Point_t *const step_down = Point_scale(Point(0,0,0), up, -1.0 / ((double)(height) * 0.5));
 
+    printf("Eye: (%f, %f, %f), POV: <%f,%f,%f>\n", eye->x, eye->y, eye->z, pov->x, pov->y, pov->z);
+    printf("Up:    <%f, %f, %f>\n", up->x, up->y, up->z);
+    printf("Right: <%f, %f, %f>\n", right->x, right->y, right->z);
+    printf("TL:    <%f, %f, %f>\n", top_left->x, top_left->y, top_left->z);
+    printf("Step-Down:  <%f, %f, %f>\n", step_down->x, step_down->y, step_down->z);
+    printf("Step-Right: <%f, %f, %f>\n", step_right->x, step_right->y, step_right->z);
+
     //The point we cast rays through.
     Point_t pt;
     Point_t ray;
