@@ -61,6 +61,7 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     printf("TL:    <%f, %f, %f>\n", top_left->x, top_left->y, top_left->z);
     printf("Step-Down:  <%f, %f, %f>\n", step_down->x, step_down->y, step_down->z);
     printf("Step-Right: <%f, %f, %f>\n", step_right->x, step_right->y, step_right->z);
+    puts("----------------------------");
 
     //The point we cast rays through.
     Point_t pt;
@@ -79,27 +80,36 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
     guchar *pix;
 
-    double distance, min_dist = INFINITY;
+    double distance, min_dist;
     Color_t render_color, test_color;
     const Triangle_t *const *pTriangle;
 
     Point_copy(&row_start, top_left);
     for(i=0; i<width; i++) {
         Point_copy(&pt, &row_start);
+        //puts("-----");
+        //printf("Start of row %d: (%f, %f, %f)\n", i, pt.x, pt.y, pt.z);
         for(j=0; j<height; j++) {
             Point_displacement(&ray, eye, &pt);
+
+            //printf("(%d,%d) at (%f, %f, %f) by <%f, %f, %f>\n", i, j, pt.x, pt.y, pt.z, ray.x, ray.y, ray.z);
     
             //Find which triangle it intersect withs closest.
+            min_dist = INFINITY;
+            Color_cfg(&render_color, 0, 0, 0);
             pTriangle = scene->triangles;
             for(pTriangle = scene->triangles; *(pTriangle) != NULL; pTriangle++)
             {
                 distance = Triangle_intersect(*pTriangle, &test_color, eye, &ray);
+                //printf("    Intersection with %p: %f (%f: %d): RGB(%d, %d, %d)\n", *pTriangle, distance, min_dist, distance < min_dist, test_color.r, test_color.g, test_color.b);
+
                 //TODO: Should be past the frame
                 if (distance >= 0 && distance < min_dist) {
                     Color_copy(&render_color, &test_color);
                     min_dist = distance;
                 }
             }
+            //printf("    Render: RGB(%d, %d, %d)\n", render_color.r, render_color.g, render_color.b);
 
             pix = pixels + (j*rowstride) + (i*3);
             pix[0] = render_color.r;
