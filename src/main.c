@@ -12,29 +12,18 @@
 
 int main(void) {
 
-    Color_t col_a = {.r=255, .g=0, .b=0};
-    Color_t col_b = {.r=0, .g=255, .b=0};
-    Color_t col_c = {.r=0, .g=0, .b=255};
+    Vertex_t *vert_a = Vertex(Point(0, 0, 0), Color(255, 0, 0));
+    Vertex_t *vert_b = Vertex(Point(0, 1, 0), Color(0, 255, 0));
+    Vertex_t *vert_c = Vertex(Point(1, 0, 0), Color(0, 0, 255));
+    Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
 
-    Point_t point_a = {.x=0.0, .y=0.0, .z=0.0};
-    Point_t point_b = {.x=0.0, .y=1.0, .z=0.0};
-    Point_t point_c = {.x=1.0, .y=0.0, .z=0.0};
-
-    Vertex_t vert_a = {.loc = &point_a, .color = &col_a};
-    Vertex_t vert_b = {.loc = &point_b, .color = &col_b};
-    Vertex_t vert_c = {.loc = &point_c, .color = &col_c};
-
-    Triangle_t triangle;
-    triangle.vert[0] = &vert_a;
-    triangle.vert[1] = &vert_b;
-    triangle.vert[2] = &vert_c;
-
-    Point_t test_pt = {.x=0, .y=0, .z=0};
+    Point_t *test_pt = Point(0.5, 0, 0);
     Color_t test_color;
 
-    Triangle_getColor(&triangle, &test_color, &test_pt);
+    Triangle_getColor(triangle, &test_color, test_pt);
 
-    printf("Triangle at (%f, %f, %f) is [%d,%d,%d]\n", test_pt.x, test_pt.y, test_pt.z, test_color.r, test_color.g, test_color.b);
+    printf("Area of triangle: %f\n", triangle->area);
+    printf("Triangle at (%f, %f, %f) is [%d,%d,%d]\n", test_pt->x, test_pt->y, test_pt->z, test_color.r, test_color.g, test_color.b);
 
     return 0;
 }

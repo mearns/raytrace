@@ -37,13 +37,17 @@ static TriangleVertIndex_t vertIndex(int vidx)
 
 static double Triangle_signedArea(const Point_t *const pA, const Point_t *const pB, const Point_t *const pC)
 {
-    Point_t ab, ac;
+    Point_t ab, ac, xp;
 
     //Get vectors.
     Point_displacement(&ab, pA, pB);
     Point_displacement(&ac, pA, pC);
 
-    return 0.5 * Point_length(&ab) * Point_length(&ac) * sin(Point_vectorAngle(&ab, &ac));
+    Point_crossProduct(&xp, &ab, &ac);
+
+    const double xpl = Point_length(&xp);
+
+    return 0.5 * xpl;
 }
 
 Point_t * Triangle_barycentricPosition(const Triangle_t *const pThis, Point_t *const opBarry, const Point_t *const pPoint)
@@ -53,8 +57,8 @@ Point_t * Triangle_barycentricPosition(const Triangle_t *const pThis, Point_t *c
     const Point_t *const c = pThis->vert[2]->loc;
 
     const double pbc = Triangle_signedArea(pPoint, b, c);
-    const double pca = Triangle_signedArea(pPoint, c, a);
-    const double pab = Triangle_signedArea(pPoint, a, b);
+    const double pca = Triangle_signedArea(a, pPoint, c);
+    const double pab = Triangle_signedArea(a, b, pPoint);
 
     return Point_cfg(opBarry, pbc / pThis->area, pca / pThis->area, pab / pThis->area);
 }
