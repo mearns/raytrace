@@ -69,21 +69,6 @@ Triangle_t* Triangle_cfg(Triangle_t *const pThis, Vertex_t *const pVertex1, Vert
     pThis->vert[1] = pVertex2;
     pThis->vert[2] = pVertex3;
 
-    pThis->side[0] = Point_distance(pVertex1->loc, pVertex2->loc);
-    pThis->side[1] = Point_distance(pVertex2->loc, pVertex3->loc);
-    pThis->side[2] = Point_distance(pVertex3->loc, pVertex1->loc);
-
-    const double a = pVertex1->loc->x - pVertex3->loc->x;
-    const double b = pVertex2->loc->x - pVertex3->loc->x;
-    const double c = pVertex1->loc->y - pVertex3->loc->y;
-    const double d = pVertex2->loc->y - pVertex3->loc->y;
-    const double inv_det = 1.0 / ((a*d) - (b*c));
-
-    pThis->inv_barryform[0][0] = d*inv_det;
-    pThis->inv_barryform[1][0] = (-b)*inv_det;
-    pThis->inv_barryform[0][1] = (-c)*inv_det;
-    pThis->inv_barryform[1][1] = a*inv_det;
-
     pThis->area = Triangle_signedArea(pVertex1->loc, pVertex2->loc, pVertex3->loc);
 
     return pThis;
