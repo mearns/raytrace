@@ -17,10 +17,8 @@ env = Environment(
 env.Append(CCFLAGS=' -Wall')
 env.ParseConfig('pkg-config --cflags --libs glib-2.0 gtk+-2.0')
 
-env.VariantDir("build/", "src/")
-
-
-src_files = env.Glob('build/*.c')
+#env.VariantDir("build/", "src/")
+src_files = env.Glob('src/*.c')
 
 obj_files = env.Object(src_files)
 env.Alias('obj', obj_files)
