@@ -4,6 +4,9 @@
 *.swn
 *.swm
 
+#CTags
+tags
+
 # Scons files
 .sconsign.dblite
 

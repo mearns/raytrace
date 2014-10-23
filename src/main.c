@@ -3,6 +3,8 @@
  *
  */
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -17,6 +19,7 @@ typedef struct {
     const Triangle_t *const * triangles;
     const Point_t *eye;
     const Point_t *pov;
+    const Point_t *up;
     double frame_width;
     double frame_height;
     int img_width;
@@ -29,6 +32,33 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     const Scene_t *const scene = (const Scene_t*)(data);
     const int width = scene->img_width;
     const int height = scene->img_height;
+    const Point_t *const eye = scene->eye;
+    const Point_t *const pov = scene->pov;
+
+    //TODO: Dynamic allocation was for convenience, but all of these should be statically allocated on the stack.
+
+    //Up is a vector pointing from the center of the frame to the top of the frame.
+    Point_t *const up = Point_normalize(Point(0,0,0), scene->up);
+    Point_scale(up, up, scene->frame_height/2.0);
+    
+    //And right is a vector from the center of the frame to the right edge.
+    Point_t *const right = Point_crossProduct(Point(0,0,0), pov, up);
+    Point_normalize(right, right);
+    Point_scale(right, right, scene->frame_width/2.0);
+
+    //This is a point in the top-left corner of the frame.
+    Point_t *const top_left = Point_add(Point(0,0,0), eye, pov);    //To center of frame.
+    Point_add(top_left, top_left, up);    //To top of frame.
+    Point_sub(top_left, top_left, right);   //To top-left corner.
+
+    //Step by one pixel in each direction.
+    Point_t *const step_right = Point_scale(Point(0,0,0), right, 1.0 / ((double)(width) * 0.5));
+    Point_t *const step_down = Point_scale(Point(0,0,0), up, -1.0 / ((double)(height) * 0.5));
+
+    //The point we cast rays through.
+    Point_t pt;
+    Point_t ray;
+    Point_t row_start;
 
     //Create our pix buffer.
     GdkPixbuf * pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
@@ -41,17 +71,50 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     const int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
     guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
     guchar *pix;
+
+    double distance, min_dist = INFINITY;
+    Color_t render_color, test_color;
+    const Triangle_t *const *pTriangle;
+
+    Point_copy(&row_start, top_left);
     for(i=0; i<width; i++) {
+        Point_copy(&pt, &row_start);
         for(j=0; j<height; j++) {
+            Point_displacement(&ray, eye, &pt);
+    
+            //Find which triangle it intersect withs closest.
+            pTriangle = scene->triangles;
+            for(pTriangle = scene->triangles; *(pTriangle) != NULL; pTriangle++)
+            {
+                distance = Triangle_intersect(*pTriangle, &test_color, eye, &ray);
+                //TODO: Should be past the frame
+                if (distance >= 0 && distance < min_dist) {
+                    Color_copy(&render_color, &test_color);
+                    min_dist = distance;
+                }
+            }
+
             pix = pixels + (j*rowstride) + (i*3);
-            pix[0] = i % 255; //red
-            pix[1] = j % 255; //green
-            pix[2] = 0; //blue;
+            pix[0] = render_color.r;
+            pix[1] = render_color.g;
+            pix[2] = render_color.b;
+
+            //Step to the next pixel.
+            Point_add(&pt, &pt, step_right);
         }
+
+        //Step to the next row.
+        Point_add(&row_start, &row_start, step_down);
     }
 
     //Draw it to the window.
     gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
+
+    free(up);
+    free(right);
+    free(top_left);
+    free(step_right);
+    free(step_down);
 
     return TRUE;
 }
@@ -89,23 +152,16 @@ int main(int argc, char **argv)
     Vertex_t *vert_c = Vertex(Point(1, 0, 5), Color(0, 0, 255));
     Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
 
-    Point_t *test_pt = Point(0.5, 0, 0);
-    Color_t test_color;
-
-    Triangle_getColor(triangle, &test_color, test_pt);
-
-    printf("Area of triangle: %f\n", triangle->area);
-    printf("Triangle at (%f, %f, %f) is [%d,%d,%d]\n", test_pt->x, test_pt->y, test_pt->z, test_color.r, test_color.g, test_color.b);
-
     const Triangle_t *const triangles[] = {triangle, NULL};
     Scene_t scene;
     scene.triangles = triangles;
     scene.eye = Point(0, 0, 0);
     scene.pov = Point(0, 0, 1);
+    scene.up = Point(0, 1, 0);
     scene.frame_width = 1.0;
     scene.frame_height = 1.0;
-    scene.img_height = 100;
-    scene.img_width = 100;
+    scene.img_height = 200;
+    scene.img_width = 200;
 
     show_scene(&scene);
 

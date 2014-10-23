@@ -31,6 +31,16 @@ Point_t * Point_cfg(Point_t *const pThis, const double x, const double y, const 
     return pThis;
 }
 
+Point_t * Point_copy(Point_t * pThis,  const Point_t *pRhs)
+{
+    return Point_cfg(pThis, pRhs->x, pRhs->y, pRhs->z);
+}
+
+Point_t * Point_add(Point_t *opPoint, const Point_t *pA, const Point_t *pB)
+{
+    return Point_cfg(opPoint, pA->x+pB->x, pA->y+pB->y, pA->z+pB->z);
+}
+
 Point_t * Point_displacement(Point_t *const opDisp, const Point_t *const pA, const Point_t *const pB)
 {
     return Point_cfg(opDisp, pB->x - pA->x, pB->y - pA->y, pB->z - pA->z);

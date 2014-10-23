@@ -24,6 +24,8 @@ typedef struct {
  */
 Color_t * Color_cfg(Color_t *pThis, uint8_t r, uint8_t g, uint8_t b);
 
+Color_t * Color_copy(Color_t *pThis, const Color_t *pRhs);
+
 /**
  * Function: Color
  * Dynamically allocated a new <Color_t> object, and initializes it

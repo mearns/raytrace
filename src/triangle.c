@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "point.h"
 #include "util.h"
@@ -24,15 +25,58 @@ static const TriangleVertIndex_t Triangle_Sides[3][2] = {
     {VTX3, VTX2}    //(3->1), (3->2)
 };
 
-static TriangleVertIndex_t vertIndex(int vidx)
+static Color_t * Triangle_getBaryColor(const Triangle_t *const pThis, Color_t *const opColor, const Point_t *const pBary)
 {
-    if(vidx < 0) {
-        return VTX1;
+    const double r = (pBary->x*(pThis->vert[0]->color->r)) + (pBary->y*(pThis->vert[1]->color->r)) + (pBary->z*(pThis->vert[2]->color->r));
+    const double g = (pBary->x*(pThis->vert[0]->color->g)) + (pBary->y*(pThis->vert[1]->color->g)) + (pBary->z*(pThis->vert[2]->color->g));
+    const double b = (pBary->x*(pThis->vert[0]->color->b)) + (pBary->y*(pThis->vert[1]->color->b)) + (pBary->z*(pThis->vert[2]->color->b));
+
+    return Color_cfg(opColor, r, g, b);
+}
+
+double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Point_t *const vect)
+{
+    //A point on the plane of the triangle.
+    const Point_t *const pop = pThis->vert[0]->loc;
+
+    const double denom = Point_dotProduct(vect, &(pThis->normal));
+    if (denom == 0) {
+        //Line and plane are parallel, no intersection (or infinite intersection).
+        return INFINITY;
     }
-    if(vidx > 2) {
-        return VTX3;
+
+    Point_t disp;
+    Point_sub(&disp, pop, pt);
+
+    const double numer = Point_dotProduct(&disp, &(pThis->normal));
+    const double dist = numer / denom;
+
+    //Intersection if "behind" the starting point of the ray, so there is no intersection.
+    if(dist < 0) {
+        return INFINITY;
     }
-    return (TriangleVertIndex_t)(vidx);
+
+    //Pointer from pt to the intersection.
+    Point_t pointer;
+    Point_scale(&pointer, vect, dist);
+
+    //Point of intersection.
+    Point_t intersection;
+    Point_add(&intersection, pt, &pointer);
+
+    //Get the barycentric position of the intersection.
+    Point_t bary;
+    Triangle_barycentricPosition(pThis, &bary, &intersection);
+
+    //If any of it's components are negative, it is outside of the triangle, so no intersection.
+    if(bary.x < 0 || bary.y < 0 || bary.z < 0) {
+        return INFINITY;
+    }
+
+    //Get the color of the intersection point.
+    Triangle_getBaryColor(pThis, opColor, &bary);
+
+    return dist;
 }
 
 static double Triangle_signedArea(const Point_t *const pA, const Point_t *const pB, const Point_t *const pC)
@@ -48,6 +92,16 @@ static double Triangle_signedArea(const Point_t *const pA, const Point_t *const 
     const double xpl = Point_length(&xp);
 
     return 0.5 * xpl;
+}
+
+bool Triangle_isInside(const Triangle_t *const pThis, const Point_t *const pPt)
+{
+    Point_t bary;
+    Triangle_barycentricPosition(pThis, &bary, pPt);
+    if(pPt->x < 0 || pPt->y < 0 || pPt->z < 0) {
+        return false;
+    }
+    return true;
 }
 
 Point_t * Triangle_barycentricPosition(const Triangle_t *const pThis, Point_t *const opBarry, const Point_t *const pPoint)
@@ -71,6 +125,11 @@ Triangle_t* Triangle_cfg(Triangle_t *const pThis, Vertex_t *const pVertex1, Vert
 
     pThis->area = Triangle_signedArea(pVertex1->loc, pVertex2->loc, pVertex3->loc);
 
+    Point_t u, v;
+    Point_displacement(&u, pVertex1->loc, pVertex2->loc);
+    Point_displacement(&v, pVertex1->loc, pVertex3->loc);
+    Point_crossProduct(&(pThis->normal), &u, &v);
+
     return pThis;
 }
 
@@ -88,16 +147,12 @@ Triangle_t* Triangle_clone(const Triangle_t *const pRhs)
     return Util_cloneOrDie(pRhs, sizeof(Triangle_t), "Cloning Triangle_t object.");
 }
 
+
 Color_t * Triangle_getColor(const Triangle_t *const pThis, Color_t *const opColor, const Point_t *const pPt)
 {
     Point_t bary;
     Triangle_barycentricPosition(pThis, &bary, pPt);
-
-    const double r = (bary.x*(pThis->vert[0]->color->r)) + (bary.y*(pThis->vert[1]->color->r)) + (bary.z*(pThis->vert[2]->color->r));
-    const double g = (bary.x*(pThis->vert[0]->color->g)) + (bary.y*(pThis->vert[1]->color->g)) + (bary.z*(pThis->vert[2]->color->g));
-    const double b = (bary.x*(pThis->vert[0]->color->b)) + (bary.y*(pThis->vert[1]->color->b)) + (bary.z*(pThis->vert[2]->color->b));
-
-    return Color_cfg(opColor, r, g, b);
+    return Triangle_getBaryColor(pThis, opColor, &bary);
 };
 
 

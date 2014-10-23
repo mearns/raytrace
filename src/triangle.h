@@ -24,7 +24,19 @@ typedef enum {VTX1=0, VTX2=1, VTX3=2} TriangleVertIndex_t;
  */
 typedef struct {
     Vertex_t *vert[3];
+
+    /**
+     * Field: area
+     * The signed area of the triangle.
+     */
     double area;
+
+    /**
+     * Field: normal
+     * A vector normal to the triangle. This is the cross product of the vector from VTX1 to VTX2
+     * and the vector from VTX1 to VTX3.
+     */
+    Point_t normal;
 } Triangle_t;
 
 Point_t * Triangle_barycentricPosition(const Triangle_t *pThis, Point_t *opBarry, const Point_t *opPoint);
@@ -68,6 +80,31 @@ Triangle_t* Triangle_clone(const Triangle_t *pRhs);
  *  pPt     -   const <Point_t>* : The point, presumably on the triangle, to get the color of.
  */
 Color_t * Triangle_getColor(const Triangle_t *pThis, Color_t *opColor, const Point_t *pPt);
+
+/**
+ * Function: Triangle_intersect
+ *
+ * Finds the point at which a ray intersects with this triangle, and returns the distance from the start
+ * of the ray to the point of intersection, as well as populating the <opColor> buffer object with 
+ * the color of the triangle at the point of intersection (as with <Triangle_getColor>).
+ *
+ * Returns <INFINITY> if there is no intersection between the ray and the triangle, which includes if the
+ * ray is parallel to the triangle, if the ray intersects the plane of the tiangle but not the triangle itself,
+ * or if the triangle is "behind" the ray.
+ *
+ * Arguments:
+ *  pThis   -   const <Triangle_t>* : the triangle with which to intersect the ray.
+ *  opColor -   <Color_t>* : Pointer to a color object which will be populated with the color
+ *              of the triangle at the point of intersection, **if and only if* the ray intersects
+ *              the triangle. Otherwise this object will not be touched.
+ *  pt      -   const <Point_t>* : The starting point of the ray.
+ *  vect    -   const <Point_t>* : The vector describing the direction of the ray
+ *
+ * Returns:
+ *  A double indicating the distance from <pt> (the start of the ray) to the point of intersection,
+ *  or <INFINITY> (from "math.h") if the ray does not intersect the triangle.
+ */
+double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Point_t *const vect);
 
 #endif
 //end inclusion filter
