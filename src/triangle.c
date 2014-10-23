@@ -71,7 +71,7 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
 
     //If any of it's components are negative, it is outside of the triangle, so no intersection.
     if(bary.x < 0 || bary.y < 0 || bary.z < 0) {
-        printf("NOT INSIDE!\n");
+        //FIXME: This isn't right. See not at isInside.
         return INFINITY;
     }
 
@@ -98,6 +98,11 @@ static double Triangle_signedArea(const Point_t *const pA, const Point_t *const 
 
 bool Triangle_isInside(const Triangle_t *const pThis, const Point_t *const pPt)
 {
+    //FIXME: This isn't right, because signedArea isn't actually signed (FIXTHAT, too).
+    // We can test if a triangle is lef thanded or right handed by taking the cross product of
+    // the two leg vectors extending from a common vertex. The vector points in one direction for
+    // right handed, and the other direction for left handed. So we can see if it points in the same (general)
+    // direction as the triangle itself, or nearly the opposite.
     Point_t bary;
     Triangle_barycentricPosition(pThis, &bary, pPt);
     if(pPt->x < 0 || pPt->y < 0 || pPt->z < 0) {
