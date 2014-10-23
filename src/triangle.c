@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "point.h"
 #include "util.h"
@@ -70,6 +71,7 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
 
     //If any of it's components are negative, it is outside of the triangle, so no intersection.
     if(bary.x < 0 || bary.y < 0 || bary.z < 0) {
+        printf("NOT INSIDE!\n");
         return INFINITY;
     }
 
