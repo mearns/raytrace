@@ -26,6 +26,14 @@ typedef struct {
     int img_height;
 } Scene_t;
 
+/**
+ *
+ * Coordinates:
+ *
+ * Note that this is a right-handed coordinate system, which may be counterintuitive in some cases.
+ * X is left and right, Y is up and down, Z is in and out (of the screen), but positive X
+ * is **to the left**, positive Y is up, and positive Z is into the screen.
+ */
 static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
     unsigned int i, j;
