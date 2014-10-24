@@ -33,7 +33,7 @@ typedef struct {
 
     /**
      * Field: normal
-     * A vector normal to the triangle. This is the cross product of the vector from VTX1 to VTX2
+     * A unit vector normal to the triangle. This is the cross product of the vector from VTX1 to VTX2
      * and the vector from VTX1 to VTX3.
      */
     Point_t normal;

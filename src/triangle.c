@@ -134,6 +134,7 @@ Triangle_t* Triangle_cfg(Triangle_t *const pThis, Vertex_t *const pVertex1, Vert
     Point_displacement(&u, pVertex1->loc, pVertex2->loc);
     Point_displacement(&v, pVertex1->loc, pVertex3->loc);
     Point_crossProduct(&(pThis->normal), &u, &v);
+    Point_normalize(&(pThis->normal), &(pThis->normal));
 
     pThis->area = Triangle_signedArea(&(pThis->normal), pVertex1->loc, pVertex2->loc, pVertex3->loc);
 
