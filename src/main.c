@@ -38,13 +38,17 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     //TODO: Dynamic allocation was for convenience, but all of these should be statically allocated on the stack.
 
     //Up is a vector pointing from the center of the frame to the top of the frame.
-    Point_t *const up = Point_normalize(Point(0,0,0), scene->up);
-    Point_scale(up, up, scene->frame_height/2.0);
+    Point_t *const up = Point_clone(scene->up);
     
     //And right is a vector from the center of the frame to the right edge.
     Point_t *const right = Point_crossProduct(Point(0,0,0), pov, up);
     Point_normalize(right, right);
     Point_scale(right, right, scene->frame_width/2.0);
+
+    // Make sure up is really up, i.e., really perpindicular to pov (and right).
+    Point_crossProduct(up, right, pov);
+    Point_normalize(up, up);
+    Point_scale(up, up, scene->frame_height/2.0);
 
     //This is a point in the top-left corner of the frame.
     Point_t *const top_left = Point_add(Point(0,0,0), eye, pov);    //To center of frame.
