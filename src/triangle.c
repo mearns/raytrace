@@ -81,7 +81,7 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
     return dist;
 }
 
-static double Triangle_signedArea(const Point_t *const pA, const Point_t *const pB, const Point_t *const pC)
+static double Triangle_signedArea(const Point_t *const pNorm, const Point_t *const pA, const Point_t *const pB, const Point_t *const pC)
 {
     Point_t ab, ac, xp;
 
@@ -91,7 +91,7 @@ static double Triangle_signedArea(const Point_t *const pA, const Point_t *const 
 
     Point_crossProduct(&xp, &ab, &ac);
 
-    const double xpl = Point_length(&xp);
+    const double xpl = Point_dotProduct(&xp, pNorm);
 
     return 0.5 * xpl;
 }
@@ -117,9 +117,9 @@ Point_t * Triangle_barycentricPosition(const Triangle_t *const pThis, Point_t *c
     const Point_t *const b = pThis->vert[1]->loc;
     const Point_t *const c = pThis->vert[2]->loc;
 
-    const double pbc = Triangle_signedArea(pPoint, b, c);
-    const double pca = Triangle_signedArea(a, pPoint, c);
-    const double pab = Triangle_signedArea(a, b, pPoint);
+    const double pbc = Triangle_signedArea(&(pThis->normal), pPoint, b, c);
+    const double pca = Triangle_signedArea(&(pThis->normal), a, pPoint, c);
+    const double pab = Triangle_signedArea(&(pThis->normal), a, b, pPoint);
 
     return Point_cfg(opBarry, pbc / pThis->area, pca / pThis->area, pab / pThis->area);
 }
@@ -130,12 +130,12 @@ Triangle_t* Triangle_cfg(Triangle_t *const pThis, Vertex_t *const pVertex1, Vert
     pThis->vert[1] = pVertex2;
     pThis->vert[2] = pVertex3;
 
-    pThis->area = Triangle_signedArea(pVertex1->loc, pVertex2->loc, pVertex3->loc);
-
     Point_t u, v;
     Point_displacement(&u, pVertex1->loc, pVertex2->loc);
     Point_displacement(&v, pVertex1->loc, pVertex3->loc);
     Point_crossProduct(&(pThis->normal), &u, &v);
+
+    pThis->area = Triangle_signedArea(&(pThis->normal), pVertex1->loc, pVertex2->loc, pVertex3->loc);
 
     return pThis;
 }
