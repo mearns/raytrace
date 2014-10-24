@@ -46,18 +46,18 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     Point_scale(right, right, scene->frame_width/2.0);
 
     // Make sure up is really up, i.e., really perpindicular to pov (and right).
-    Point_t *const down = Point_crossProduct(Point(0,0,0), pov, right);
-    Point_normalize(down, down);
-    Point_scale(down, down, scene->frame_height/2.0);
+    Point_crossProduct(up, right, pov);
+    Point_normalize(up, up);
+    Point_scale(up, up, scene->frame_height/2.0);
 
-    //This is a point in the bottom-left corner of the frame.
-    Point_t *const bottom_left = Point_add(Point(0,0,0), eye, pov);    //To center of frame.
-    Point_add(bottom_left, bottom_left, down);    //To top of frame.
-    Point_sub(bottom_left, bottom_left, right);   //To top-left corner.
+    //This is a point in the top-left corner of the frame.
+    Point_t *const top_left = Point_add(Point(0,0,0), eye, pov);    //To center of frame.
+    Point_add(top_left, top_left, up);    //To top of frame.
+    Point_sub(top_left, top_left, right);   //To top-left corner.
 
     //Step by one pixel in each direction.
     Point_t *const step_right = Point_scale(Point(0,0,0), right, 1.0 / ((double)(width) * 0.5));
-    Point_t *const step_up = Point_scale(Point(0,0,0), down, -1.0 / ((double)(height) * 0.5));
+    Point_t *const step_down = Point_scale(Point(0,0,0), up, -1.0 / ((double)(height) * 0.5));
 
     //The point we cast rays through.
     Point_t pt;
@@ -80,7 +80,7 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     Color_t render_color, test_color;
     const Triangle_t *const *pTriangle;
 
-    Point_copy(&row_start, bottom_left);
+    Point_copy(&row_start, top_left);
     for(i=0; i<width; i++) {
         Point_copy(&pt, &row_start);
         //puts("-----");
@@ -112,18 +112,17 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
         }
 
         //Step to the next row.
-        Point_add(&row_start, &row_start, step_up);
+        Point_add(&row_start, &row_start, step_down);
     }
 
     //Draw it to the window.
     gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
 
     free(up);
-    free(down);
     free(right);
-    free(bottom_left);
+    free(top_left);
     free(step_right);
-    free(step_up);
+    free(step_down);
 
     return TRUE;
 }
@@ -158,7 +157,7 @@ int main(int argc, char **argv)
 
     Vertex_t *vert_a = Vertex(Point(0, 0, 5), Color(255, 0, 0));
     Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(0, 255, 0));
-    Vertex_t *vert_c = Vertex(Point(2, 0, 5), Color(0, 0, 255));
+    Vertex_t *vert_c = Vertex(Point(1, 0, 5), Color(0, 0, 255));
     Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
 
     const Triangle_t *const triangles[] = {triangle, NULL};
