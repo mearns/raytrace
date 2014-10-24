@@ -71,7 +71,15 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
 
     //If any of it's components are negative, it is outside of the triangle, so no intersection.
     if(bary.x < 0 || bary.y < 0 || bary.z < 0) {
-        //FIXME: This isn't right. See not at isInside.
+        //XXX: FIXME: This isn't right. See not at isInside.
+        //To get barcentric coord, triangles for calculating areas should always start with P,
+        // then go to the other two vertices of the triangle always in a consistent order (the
+        // same one used to calculate the total area of the triangle).
+        // Then are should be properly signed, and this should work.
+        // And I don't remember why I needed to know, but to know if parallel vectors are in
+        // the same direction or opposite, take their dot product, which is |U||V|cos(theta),
+        // so if they are in the same direction, this will be positive (theta will be 0 or
+        // near zero), and if in opposite, it will be negative (theta will be close to 180).
         return INFINITY;
     }
 
