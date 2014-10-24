@@ -59,14 +59,6 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     Point_t *const step_right = Point_scale(Point(0,0,0), right, 1.0 / ((double)(width) * 0.5));
     Point_t *const step_down = Point_scale(Point(0,0,0), up, -1.0 / ((double)(height) * 0.5));
 
-    printf("Eye: (%f, %f, %f), POV: <%f,%f,%f>\n", eye->x, eye->y, eye->z, pov->x, pov->y, pov->z);
-    printf("Up:    <%f, %f, %f>\n", up->x, up->y, up->z);
-    printf("Right: <%f, %f, %f>\n", right->x, right->y, right->z);
-    printf("TL:    <%f, %f, %f>\n", top_left->x, top_left->y, top_left->z);
-    printf("Step-Down:  <%f, %f, %f>\n", step_down->x, step_down->y, step_down->z);
-    printf("Step-Right: <%f, %f, %f>\n", step_right->x, step_right->y, step_right->z);
-    puts("----------------------------");
-
     //The point we cast rays through.
     Point_t pt;
     Point_t ray;
@@ -92,12 +84,9 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     for(i=0; i<width; i++) {
         Point_copy(&pt, &row_start);
         //puts("-----");
-        //printf("Start of row %d: (%f, %f, %f)\n", i, pt.x, pt.y, pt.z);
         for(j=0; j<height; j++) {
             Point_displacement(&ray, eye, &pt);
 
-            //printf("(%d,%d) at (%f, %f, %f) by <%f, %f, %f>\n", i, j, pt.x, pt.y, pt.z, ray.x, ray.y, ray.z);
-    
             //Find which triangle it intersect withs closest.
             min_dist = INFINITY;
             Color_cfg(&render_color, 0, 0, 0);
@@ -105,7 +94,6 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
             for(pTriangle = scene->triangles; *(pTriangle) != NULL; pTriangle++)
             {
                 distance = Triangle_intersect(*pTriangle, &test_color, eye, &ray);
-                //printf("    Intersection with %p: %f (%f: %d): RGB(%d, %d, %d)\n", *pTriangle, distance, min_dist, distance < min_dist, test_color.r, test_color.g, test_color.b);
 
                 //TODO: Should be past the frame
                 if (distance >= 0 && distance < min_dist) {
@@ -113,7 +101,6 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
                     min_dist = distance;
                 }
             }
-            //printf("    Render: RGB(%d, %d, %d)\n", render_color.r, render_color.g, render_color.b);
 
             pix = pixels + (j*rowstride) + (i*3);
             pix[0] = render_color.r;
