@@ -81,10 +81,10 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     const Triangle_t *const *pTriangle;
 
     Point_copy(&row_start, top_left);
-    for(i=0; i<width; i++) {
+    for(j=0; j<height; j++) {
         Point_copy(&pt, &row_start);
         //puts("-----");
-        for(j=0; j<height; j++) {
+        for(i=0; i<width; i++) {
             Point_displacement(&ray, eye, &pt);
 
             //Find which triangle it intersect withs closest.
