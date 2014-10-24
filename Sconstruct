@@ -6,6 +6,7 @@ import os
 env = Environment(
     ENV = {
         'PATH': os.environ['PATH'],
+        'PKG_CONFIG_PATH': os.environ['PKG_CONFIG_PATH'],
         'TEMP' : os.environ.get('TEMP', os.environ.get('TMPDIR', './temp')),
         'TMP' : os.environ.get('TMP', os.environ.get('TMPDIR', './temp')),
     },
@@ -15,7 +16,7 @@ env = Environment(
     ],
 )
 env.Append(CCFLAGS=' -Wall')
-env.ParseConfig('pkg-config --cflags --libs glib-2.0 gtk+-2.0')
+env.ParseConfig('pkg-config --cflags --libs glib-2.0 gtk+-2.0 gdk-pixbuf-2.0')
 
 #env.VariantDir("build/", "src/")
 src_files = env.Glob('src/*.c')
