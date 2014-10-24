@@ -8,6 +8,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <cairo/cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "triangle.h"
@@ -125,7 +126,12 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     }
 
     //Draw it to the window.
-    gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
+    //XXX: GTK+-3.0 is different than 2. Hence the major version change.
+    //See https://developer.gnome.org/gtk3/stable/ch01s03.html
+    cairo_t *cr = gdk_cairo_create(widget->window);
+    gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
 
     free(up);
     free(right);
