@@ -163,12 +163,18 @@ int main(int argc, char **argv)
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
 
+    //TODO: This is very bad, lots of dynamic allocation and no freeing!
+    // good thing it's main.
+
     Vertex_t *vert_a = Vertex(Point(0, 0, 5), Color(255, 0, 0));
-    Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(0, 255, 0));
+    Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(255, 0, 0));
     Vertex_t *vert_c = Vertex(Point(1, 0, 5), Color(0, 0, 255));
     Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
 
-    const Triangle_t *const triangles[] = {triangle, NULL};
+    Vertex_t *vert_d = Vertex(Point(1, 1, 5), Color(0, 0, 255));
+    Triangle_t *tri2 = Triangle(vert_b, vert_c, vert_d);
+
+    const Triangle_t *const triangles[] = {triangle, tri2, NULL};
     Scene_t scene;
     scene.triangles = triangles;
     scene.eye = Point(0, 0, 0);
