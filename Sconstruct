@@ -1,0 +1,72 @@
+#! /usr/bin/env python
+# vim: set fileencoding=utf-8: set encoding=utf-8:
+
+
+######## This is the setup
+
+import os
+
+#Create the build environment
+env = Environment(
+    #Set up the system environment variables that will be used in the processes that are launched
+    # to actually do the builds.
+    #This process doesn't inherit (most things at least) from the system env vars, so we want
+    # to copy some of them.
+    ENV = {
+        #System Path, where executable commands are found.
+        'PATH': os.environ['PATH'],
+
+        #Tells pkg-config where to look for *.pc files.
+        'PKG_CONFIG_PATH': os.environ['PKG_CONFIG_PATH'],
+
+        #In case we need to create temp files.
+        'TEMP' : os.environ.get('TEMP', os.environ.get('TMPDIR', './temp')),
+        'TMP' : os.environ.get('TMP', os.environ.get('TMPDIR', './temp')),
+    },
+    #Specify which scons tools we want to use.
+    tools = [
+        #All the defaults (builtins)
+        'default',
+
+        #And specify we want to use gcc for C programs.
+        'gcc',
+    ],
+)
+
+#Set the CCFLAGS and LINKFLAGS construction vars, used to build the command lines
+# for compiling C files and linking object files.
+#Get all warnings.
+env.Append(CCFLAGS=' -Wall')    
+#Use parse the output of pkg-config to add additinoal CCFLAGS and LINKFLAGS needed
+# to build gtk apps.
+env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
+
+
+######## These are the build rules.
+
+#Glob for all of our C src files.
+src_files = env.Glob('src/*.c')
+
+#Build object files from source files.
+obj_files = env.Object(src_files)
+
+#Set up a command line target-alias to build the object files (e.g., `scons obj`).
+env.Alias('obj', obj_files)
+
+#Build the the program from the object files.
+program = env.Program('main', obj_files)
+
+#Install the program into the 'results' dir.
+installed = env.Install('results/', program)
+
+#Set up 'prog' as a target-alias for building and installing the progam.
+env.Alias('prog', installed)
+
+#Set the default target, if no target is specified on the command line, build and install
+# the program.
+env.Default(installed)
+
+### Build the ctags file.
+tag_file = env.Command('tags', src_files, 'ctags --c++-kinds=+p --fields=+iaS --extra=+q $SOURCES')
+env.Alias('tags', tag_file)
+
