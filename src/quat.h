@@ -1,5 +1,5 @@
 /**
- * File: quats.h
+ * File: quat.h
  *
  * About Quaternions:
  *

@@ -2,7 +2,7 @@
  * File: quats.c
  *
  */
-#include "quats.h"
+#include "quat.h"
 
 #include <math.h>
 
