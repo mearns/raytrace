@@ -71,6 +71,8 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
     double distance, min_dist;
     Color_t render_color, test_color;
     const Triangle_t *const *pTriangle;
+    guchar *scanline;
+    guchar *pix;
 
     //The point we cast rays through.
     Point_t pt;
@@ -83,6 +85,8 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 
     const int width = scene->img_width;
     const int height = scene->img_height;
+    const int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
 
     // Set Up the Frame
     Frame_cfg(&frame, scene);
@@ -90,11 +94,6 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 
     //// Render the Triangles ////
     
-    const int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
-    guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
-    guchar *scanline;
-    guchar *pix;
-
     //First row starts with the top-left corner.
     Point_copy(&row_start, &(frame.top_left));
     
