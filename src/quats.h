@@ -39,6 +39,8 @@
 
 #include "vect.h"
 #include "point.h"
+#include "vertex.h"
+#include "triangle.h"
 
 typedef struct {
     double w;
@@ -60,6 +62,9 @@ Quat_t * Quat_zero(void);
 /**
  * Function: Quat_rotation
  * Generates a quaternion representing rotation by a specified angle around a specified axis.
+ *
+ * Angle is measured in radians clockwise around the axis when looking along the same direction
+ * as the axis vector.
  *
  * Arguments:
  *  pThis   -   <Quat_t>* : The output structure to hold the quaternion that represents the rotation.
@@ -102,6 +107,9 @@ Point_t * Quat_rotatePoint(const Quat_t *pThis, Point_t *opRotated, const Point_
  */
 Vect_t * Quat_rotateVect(const Quat_t *pThis, Vect_t *opRotated, const Vect_t *pVect);
 
+Vertex_t * Quat_rotateVertexInPlace(const Quat_t *pThis, Vertex_t *pVertex);
+
+Triangle_t * Quat_rotateTriangleInPlace(const Quat_t *pThis, Triangle_t *pTriangle);
 
 #endif
 //end inclusion filter

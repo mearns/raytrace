@@ -15,6 +15,13 @@
 #include "vect.h"
 #include "vertex.h"
 #include "color.h"
+#include "quats.h"
+
+#define PI 3.1415926535897932384626433832795
+#define TWO_PI 6.283185307179586476925286766559
+
+#define rads(DEGS)  ( (DEGS) * (PI / 180.0) )
+#define degs(RADS)  ( (RADS) * (180.0 / PI) )
 
 typedef struct {
     const Triangle_t *const * triangles;
@@ -200,24 +207,59 @@ int main(int argc, char **argv)
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
 
-    //TODO: This is very bad, lots of dynamic allocation and no freeing!
-    // good thing it's main.
-
-    Vertex_t *vert_a = Vertex(Point(0, 0, 5), Color(255, 0, 0));
-    Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(0, 255, 0));
-    Vertex_t *vert_c = Vertex(Point(1, 0, 5), Color(0, 0, 255));
-    Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
-
-    const Triangle_t *const triangles[] = {triangle, NULL};
     Scene_t scene;
+    Triangle_t xytri, yztri, zxtri;
+    const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
+    Vertex_t ovtx, xvtx, yvtx, zvtx;
+    Point_t opt, xpt, ypt, zpt;
+    Color_t ocol, xcol, ycol, zcol;
+    Quat_t rot;
+    Vect_t rot_axis;
+
+    Point_cfg(&opt, 0, 0, 0);
+    Point_cfg(&xpt, 1, 0, 0);
+    Point_cfg(&ypt, 0, 1, 0);
+    Point_cfg(&zpt, 0, 0, 1);
+
+    Color_cfg(&ocol, 255, 255, 255);
+    Color_cfg(&xcol, 255, 0, 0);
+    Color_cfg(&ycol, 0, 255, 0);
+    Color_cfg(&zcol, 0, 0, 255);
+
+    Vertex_cfg(&ovtx, &opt, &ocol);
+    Vertex_cfg(&xvtx, &xpt, &xcol);
+    Vertex_cfg(&yvtx, &ypt, &ycol);
+    Vertex_cfg(&zvtx, &zpt, &zcol);
+
+    Triangle_cfg(&xytri, &ovtx, &xvtx, &yvtx);
+    Triangle_cfg(&yztri, &ovtx, &yvtx, &zvtx);
+    Triangle_cfg(&zxtri, &ovtx, &zvtx, &xvtx);
+
+
+    Point_t eye;
+    Vect_t pov, up;
+    
+    Point_cfg(&eye, 0, 0, -5);
+
+    //Orbit the camera about the origin.
+    Quat_rotation(&rot, Vect_cfg(&rot_axis, 0, 1, 0), rads(30));
+    Quat_rotatePoint(&rot, &eye, &eye);
+
+    //Keep it pointed at the origin, but frame-distance 1.
+    Vect_setMag(Point_displacement(&pov, &eye, &opt), 1.0);
+
+    //Keep it oriented in straight up and down.
+    Vect_cfg(&up, 0, 1, 0);
+
+    scene.eye = &eye;
+    scene.pov = &pov;
+    scene.up = &up;
     scene.triangles = triangles;
-    scene.eye = Point(0, 0, 0);
-    scene.pov = Vect(0, 0, 1);
-    scene.up = Vect(0, 1, 0);
     scene.frame_width = 1.0;
     scene.frame_height = 1.0;
     scene.img_height = 200;
     scene.img_width = 200;
+
 
     show_scene(&scene);
 
