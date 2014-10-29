@@ -92,16 +92,23 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
     
     const int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
     guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
+    guchar *scanline;
     guchar *pix;
 
     //First row starts with the top-left corner.
     Point_copy(&row_start, &(frame.top_left));
+    
+    //Conveniently, so does the raster data.
+    scanline = pixels;
 
     //Iterate over each row, starting at the top and going down.
     for(j=0; j<height; j++) {
 
         //Our point will walk along the row, starting with the first point in the row.
         Point_copy(&pt, &row_start);
+
+        //Same with the scan line.
+        pix = scanline;
         
         //Iterate over the pixels in the row, moving left to right.
         for(i=0; i<width; i++) {
@@ -125,18 +132,18 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
             }
 
             //Set the pixel in the GdkPixbuf.
-            // TODO: We can do less math here by walking it through the raster.
-            pix = pixels + (j*rowstride) + (i*3);
             pix[0] = render_color.r;
             pix[1] = render_color.g;
             pix[2] = render_color.b;
 
             //Step to the next pixel.
             Point_translate(&pt, &pt, &(frame.step_right));
+            pix += 3;
         }
 
         //Step to the next row.
         Point_translate(&row_start, &row_start, &(frame.step_down));
+        scanline += rowstride;
     }
 
 }
