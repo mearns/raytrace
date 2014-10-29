@@ -59,6 +59,15 @@ Axes_t * Axes_pitch(Axes_t *const pThis, const double rads)
     return pThis;
 }
 
+Axes_t * Axes_roll(Axes_t *const pThis, const double rads)
+{
+    Quat_t rot;
+    Quat_rotation(&rot, &(pThis->z), rads);
+    Quat_rotateVect(&rot, &(pThis->y), &(pThis->y));
+    Vect_cross(&(pThis->x), &(pThis->y), &(pThis->z));
+    return pThis;
+}
+
 Axes_t * Axes_march(Axes_t *const pThis, const double dist)
 {
     Vect_t disp;
@@ -93,5 +102,19 @@ Point_t * Axes_point(const Axes_t *const pThis, Point_t *const opGlobal, const P
     Vect_add(&sum, &sum, Vect_scale(&component, &(pThis->z), pLocal->z));
 
     return Point_translate(opGlobal, &(pThis->origin), &sum);
+}
+
+Vect_t * Axes_vect(const Axes_t *const pThis, Vect_t *const opGlobal, const Vect_t *const pLocal)
+{
+    Vect_t sum;
+    Vect_t component;
+    Vect_t ovect;
+
+    Vect_scale(&sum, &(pThis->x), pLocal->x);
+    Vect_add(&sum, &sum, Vect_scale(&component, &(pThis->y), pLocal->y));
+    Vect_add(&sum, &sum, Vect_scale(&component, &(pThis->z), pLocal->z));
+
+    return Vect_add(opGlobal, Point_position(&ovect, &(pThis->origin)), &sum);
+
 }
 

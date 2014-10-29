@@ -17,13 +17,12 @@
 #include "color.h"
 #include "quat.h"
 #include "axes.h"
+#include "camera.h"
 #include "trig_helper.h"
 
 typedef struct {
     const Triangle_t *const * triangles;
-    const Point_t *eye;
-    const Vect_t *pov;
-    const Vect_t *up;
+    const Camera_t *cam;
     double frame_width;
     double frame_height;
     int img_width;
@@ -38,17 +37,24 @@ typedef struct {
 
 static void Frame_cfg(Frame_t *pThis, const Scene_t *const scene)
 {
+    Point_t eye;
+    Vect_t pov;
     Vect_t up;
     Vect_t right;
 
+    //Get the eye, pov, and up vector from the camera.
+    Camera_getEye(scene->cam, &eye);
+    Camera_getPov(scene->cam, &pov);
+    Camera_getUp(scene->cam, &up);
+
     //Create the vector pointing right as the cross product of up and pov.
-    Vect_cross(&right, scene->pov, scene->up);
+    Vect_cross(&right, &pov, &up);
     
     //Now make sure up is really up, i.e., perpendicular to both pov and right
     // (because right is a cross product of pov, we know right is perpendicular to pov.
     // The cross product of right and pov will be perp to both, so all three will be
     // mutually perpendicular.
-    Vect_cross(&up, &right, scene->pov);
+    Vect_cross(&up, &right, &pov);
 
     //Make up be half the height of the frame, and right be half the width.
     Vect_setMag(&up, (scene->frame_height)*0.5);
@@ -57,7 +63,7 @@ static void Frame_cfg(Frame_t *pThis, const Scene_t *const scene)
     //Get a point in the top-left corner of the frame by starting at the eye,
     // translating to the center of the frame with pov, then translating to the top-center
     // of the frame with up, and then translating back to the top-left corner with right.
-    Point_translate(&(pThis->top_left), scene->eye, scene->pov);
+    Point_translate(&(pThis->top_left), &eye, &pov);
     Point_translate(&(pThis->top_left), &(pThis->top_left), &up);
     Point_translateBack(&(pThis->top_left), &(pThis->top_left), &right);
 
@@ -76,6 +82,7 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
     const Triangle_t *const *pTriangle;
     guchar *scanline;
     guchar *pix;
+    Point_t eye;
 
     //The point we cast rays through.
     Point_t pt;
@@ -96,6 +103,9 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 
 
     //// Render the Triangles ////
+
+    //Get the camera eye
+    Camera_getEye(scene->cam, &eye);
     
     //First row starts with the top-left corner.
     Point_copy(&row_start, &(frame.top_left));
@@ -116,7 +126,7 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
         for(i=0; i<width; i++) {
 
             //Get the vector from the eye to the current point.
-            Point_displacement(&ray, scene->eye, &pt);
+            Point_displacement(&ray, &eye, &pt);
 
             //Find which triangle it intersect withs closest.
             min_dist = INFINITY;
@@ -199,15 +209,13 @@ void show_scene(Scene_t *const scene)
 
 int main(int argc, char **argv)
 {
-    Point_t eye;
-    Vect_t pov, up;
-    Scene_t scene;
-    Triangle_t xytri, yztri, zxtri;
-    const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
-    Vertex_t ovtx, xvtx, yvtx, zvtx;
     Point_t opt, xpt, ypt, zpt;
     Color_t ocol, xcol, ycol, zcol;
-    Axes_t axes;
+    Vertex_t ovtx, xvtx, yvtx, zvtx;
+    Triangle_t xytri, yztri, zxtri;
+    const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
+    Camera_t cam;
+    Scene_t scene;
 
     /* Initialize the GTK+ and all of its supporting libraries. */
     gtk_init (&argc, &argv);
@@ -234,24 +242,14 @@ int main(int argc, char **argv)
     Triangle_cfg(&zxtri, &ovtx, &zvtx, &xvtx);
 
 
-    Axes_cfg(&axes);
-    Axes_yaw(&axes, rads(30));
-    Axes_pitch(&axes, rads(-30));
-    Axes_march(&axes, -3.0);
+    Camera_cfg(&cam, 1.0);
+    Camera_yaw(&cam, rads(30));
+    Camera_pitch(&cam, rads(-30));
+    Camera_roll(&cam, rads(30));
+    Camera_march(&cam, -3.0);
     
-    Point_cfg(&eye, 0, 0, 0);
-    Axes_point(&axes, &eye, &eye); 
-
-    //Keep it pointed at the origin, but frame-distance 1.
-    Vect_setMag(Point_displacement(&pov, &eye, &opt), 1.0);
-
-    //Keep it oriented in straight up and down.
-    Vect_cfg(&up, 0, 1, 0);
-
-    scene.eye = &eye;
-    scene.pov = &pov;
-    scene.up = &up;
     scene.triangles = triangles;
+    scene.cam = &cam;
     scene.frame_width = 1.0;
     scene.frame_height = 1.0;
     scene.img_height = 200;

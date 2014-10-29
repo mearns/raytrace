@@ -38,6 +38,8 @@ Axes_t * Axes_climb(Axes_t *const pThis, const double dist);
 
 Point_t * Axes_point(const Axes_t *const pThis, Point_t *const opGlobal, const Point_t *const pLocal);
 
+Vect_t * Axes_vect(const Axes_t *const pThis, Vect_t *const opGlobal, const Vect_t *const pLocal);
+
 #endif
 //end inclusion filter
 
