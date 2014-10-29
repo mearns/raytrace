@@ -1,6 +1,38 @@
 /**
  * File: quats.h
  *
+ * About Quaternions:
+ *
+ * Quaternions are a four-dimensional extension to the two-dimensional complex numbers.
+ * As a complex number is a vector with basis (1, i), a quat is a vector with basis
+ * (1, i, j, k), where i, j, and k are all imaginary (non-real) numbers.
+ *
+ * While the complex numbers are defined by the identity i^2 = 1, the quaternions are
+ * defined by a slightly larger set of axiomatic identities:
+ *
+ * > i^2 = j^2 = k^2 = ijk = -1
+ *
+ * From these equations, we can derive all other possible products of the basis vectors.
+ * Importantly, quaternion mltiplication is not commutative so, in general, QP != PQ
+ * for quaternions Q and P. Using this and the equations above, we can find (through
+ * left- or right- multiplication and cancelation):
+ *
+ * > ij = k
+ * > ji = -k
+ * > jk = i
+ * > kj = -i
+ * > ki = j
+ * > ik = -j
+ *
+ * Note that -1Q = Q(-1) = -Q. In other words, multiplication by a scalar (real value)
+ * is commutative.
+ *
+ *
+ * Quats as Rotation:
+ *
+ * This is not worth getting into details over here, but quats can be used to represent
+ * any rotation in three-dimensional space. That's why we are using them in this project.
+ *
  */
 #ifndef QUATS_H
 #define QuATS_H
