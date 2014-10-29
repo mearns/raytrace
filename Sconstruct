@@ -46,6 +46,7 @@ env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
 
 #Glob for all of our C src files.
 src_files = env.Glob('src/*.c')
+header_files = env.Glob('src/*.h')
 
 #Build object files from source files.
 obj_files = env.Object(src_files)
@@ -67,6 +68,6 @@ env.Alias('prog', installed)
 env.Default(installed)
 
 ### Build the ctags file.
-tag_file = env.Command('tags', src_files, 'ctags --c++-kinds=+p --fields=+iaS --extra=+q $SOURCES')
+tag_file = env.Command('tags', src_files + header_files, 'ctags --c++-kinds=+p --fields=+iaS --extra=+q $SOURCES')
 env.Alias('tags', tag_file)
 
