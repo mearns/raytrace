@@ -33,29 +33,7 @@ Plane_t * Plane_cfg(Plane_t *const pThis, double a, double b, double c, double d
 
 Plane_t * Plane_copy(Plane_t *pThis, const Plane_t *pRhs)
 {
-    return Plane_cfg(pThis, pRhs->a, pRhs->b, pRhs->c, pRhs->d);
-}
-
-Point_t * Plane_projectPoint(const Plane_t *const pThis, Point_t *const opProj, const Point_t *const pPoint)
-{
-    Point_t pop;
-    Vect_t norm;
-
-    //Get the normal unit vector.
-    Plane_getNormal(pThis, &norm);
-
-    //Get a point on the plane.
-    Plane_getPoint(pThis, &pop);
-
-    Vect_t disp;
-    Point_displacement(&disp, &pop, pPoint);
-
-    const double dot = Vect_dot(&disp, &norm);
-
-    Vect_t scaled;
-    Vect_scale(&scaled, &norm, dot);
-
-    return Point_displacement(opProj, &scaled, pPoint);
+    return Plane_cfg(pThis, pRhs->params[0], pRhs->params[1], pRhs->params[2], pRhs->params[3]);
 }
 
 Vect_t * Plane_getNormal(const Plane_t *const pThis, Vect_t *const opNormal)
@@ -70,15 +48,15 @@ Point_t * Plane_getPoint(const Plane_t *const pThis, Point_t *opPoint)
 
 Plane_t * Plane_cfgFromThreePoints(Plane_t *const pThis, const Point_t *pt1, const Point_t *pt2, const Point_t *pt3)
 {
-    Point_t vec1, vec2, norm;
+    Vect_t vec1, vec2, norm;
 
     //Get vectors from one point to each of the others.
     Point_displacement(&vec1, pt1, pt2);
     Point_displacement(&vec2, pt1, pt3);
 
     //Cross product to get normal vector.
-    Point_crossProduct(&norm, &vec1, &vec2);
-    Point_normalize(&norm, &norm);
+    Vect_cross(&norm, &vec1, &vec2);
+    Vect_normalize(&norm, &norm);
 
     const double a = norm.x;
     const double b = norm.y;

@@ -46,7 +46,7 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
     Vect_t disp;
     Point_displacement(&disp, pt, pop);
 
-    const double numer = Vector_dot(&disp, pNorm);
+    const double numer = Vect_dot(&disp, pNorm);
     const double dist = numer / denom;
 
     //Intersection if "behind" the starting point of the ray, so there is no intersection.
@@ -56,7 +56,7 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
 
     //Pointer from pt to the intersection.
     Vect_t pointer;
-    Vector_scale(&pointer, vect, dist);
+    Vect_scale(&pointer, vect, dist);
 
     //Point of intersection.
     Point_t intersection;
@@ -132,11 +132,11 @@ Triangle_t* Triangle_cfg(Triangle_t *const pThis, Vertex_t *const pVertex1, Vert
     pThis->vert[1] = pVertex2;
     pThis->vert[2] = pVertex3;
 
-    Point_t u, v;
+    Vect_t u, v;
     Point_displacement(&u, pVertex1->loc, pVertex2->loc);
     Point_displacement(&v, pVertex1->loc, pVertex3->loc);
-    Point_crossProduct(&(pThis->normal), &u, &v);
-    Point_normalize(&(pThis->normal), &(pThis->normal));
+    Vect_cross(&(pThis->normal), &u, &v);
+    Vect_normalize(&(pThis->normal), &(pThis->normal));
 
     pThis->area = Triangle_signedArea(&(pThis->normal), pVertex1->loc, pVertex2->loc, pVertex3->loc);
 

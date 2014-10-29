@@ -48,14 +48,14 @@ Point_t * Point_translate(Point_t *opPoint, const Point_t *pPt, const Vect_t *pT
     return Point_cfg(opPoint, pPt->x+pTrans->x, pPt->y+pTrans->y, pPt->z+pTrans->z);
 }
 
-Point_t * Point_translateBack(Point_t *opPoint, const Point_t *pPt, const Point_t *pTrans)
+Point_t * Point_translateBack(Point_t *opPoint, const Point_t *pPt, const Vect_t *pTrans)
 {
     return Point_cfg(opPoint, pPt->x-pTrans->x, pPt->y-pTrans->y, pPt->z-pTrans->z);
 }
 
 Vect_t * Point_displacement(Vect_t *const opDisp, const Point_t *const pA, const Point_t *const pB)
 {
-    return Point_cfg(opDisp, pB->x - pA->x, pB->y - pA->y, pB->z - pA->z);
+    return Vect_cfg(opDisp, pB->x - pA->x, pB->y - pA->y, pB->z - pA->z);
 }
 
 double Point_distance(const Point_t *const pThis, const Point_t *const pOther)

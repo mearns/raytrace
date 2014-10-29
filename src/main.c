@@ -117,11 +117,11 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
             pix[2] = render_color.b;
 
             //Step to the next pixel.
-            Point_add(&pt, &pt, step_right);
+            Point_translate(&pt, &pt, step_right);
         }
 
         //Step to the next row.
-        Point_add(&row_start, &row_start, step_down);
+        Point_translate(&row_start, &row_start, step_down);
     }
 
     //Draw it to the window.
@@ -168,19 +168,19 @@ int main(int argc, char **argv)
     // good thing it's main.
 
     Vertex_t *vert_a = Vertex(Point(0, 0, 5), Color(255, 0, 0));
-    Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(255, 0, 0));
+    Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(0, 255, 0));
     Vertex_t *vert_c = Vertex(Point(1, 0, 5), Color(0, 0, 255));
     Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
 
     Vertex_t *vert_d = Vertex(Point(1, 1, 5), Color(0, 0, 255));
     Triangle_t *tri2 = Triangle(vert_b, vert_c, vert_d);
 
-    const Triangle_t *const triangles[] = {triangle, tri2, NULL};
+    const Triangle_t *const triangles[] = {triangle, NULL};
     Scene_t scene;
     scene.triangles = triangles;
     scene.eye = Point(0, 0, 0);
-    scene.pov = Point(0, 0, 1);
-    scene.up = Point(0, 1, 0);
+    scene.pov = Vect(0, 0, 1);
+    scene.up = Vect(0, 1, 0);
     scene.frame_width = 1.0;
     scene.frame_height = 1.0;
     scene.img_height = 200;

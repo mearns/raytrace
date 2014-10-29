@@ -6,6 +6,7 @@
 #define PLAIN_H
 
 #include "point.h"
+#include "vect.h"
 
 /**
  *
@@ -60,27 +61,11 @@ Plane_t * Plane_cfgFromThreePoints(Plane_t *pThis, const Point_t *pt1, const Poi
 Point_t * Plane_getPoint(const Plane_t *const pThis, Point_t *opPoint);
 
 /**
- * Function: Plane_projectPoint
- *
- * Finds the projection of the three-dimensional point <pPoint> onto
- * this plane.
- *
- * Arguments:
- *  pThis   -   const <Plane_t>* : the plane onto which the point is projected.
- *  opProj  -   <Point_t>* : The projection is stored in this object.
- *  pPoint  -   const <Point_t>* : The point to project onto the plane.
- *
- * Returns:
- *  The <opProj> output pointer, as a convenience.
- */
-Point_t * Plane_projectPoint(const Plane_t *pThis, Point_t *opProj, const Point_t *pPoint);
-
-/**
  * Function: Plane_getNormal
  * Gets a vector normal to the plane. Specifically, this is the vector <a,b,c>,
  * where the plane is defined by the parmaters a, b, c, and d.
  */
-Point_t * Plane_getNormal(const Plane_t *pThis, Vect_t *opNormal);
+Vect_t * Plane_getNormal(const Plane_t *pThis, Vect_t *opNormal);
 
 #endif
 //end inclusion filter

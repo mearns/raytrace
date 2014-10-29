@@ -6,6 +6,9 @@
 
 #include <math.h>
 
+#include "point.h"
+#include "util.h"
+
 Vect_t * Vect_cfg(Vect_t * pThis,  double x,  double y,  double z)
 {
     pThis->x = x;
@@ -81,7 +84,7 @@ double Vect_dot(const Vect_t *pA, const Vect_t *pB)
 
 Vect_t * Vect_normalize(Vect_t *opNormal, const Vect_t *const pRhs)
 {
-    const double length = Point_length(pRhs);
+    const double length = Vect_magnitude(pRhs);
     return Vect_cfg(opNormal, (pRhs->x)/length, (pRhs->y)/length, (pRhs->z)/length);
 }
 
@@ -92,7 +95,7 @@ Vect_t * Vect_scale(Vect_t *pThis, const Vect_t *pRhs, double scale)
 
 double Vect_angle(const Vect_t *pA, const Vect_t *pB)
 {
-    return acos(Vect_dotProduct(pA, pB) / (Vect_length(pA) * Vect_length(pB)));
+    return acos(Vect_dot(pA, pB) / (Vect_magnitude(pA) * Vect_magnitude(pB)));
 }
 
 Point_t * Vect_point(Point_t *opPoint, const Vect_t *pVect)

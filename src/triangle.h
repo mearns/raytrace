@@ -6,9 +6,11 @@
 #define TRIANGLE_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "vertex.h"
 #include "point.h"
+#include "vect.h"
 #include "color.h"
 #include "plane.h"
 
@@ -36,9 +38,22 @@ typedef struct {
      * A unit vector normal to the triangle. This is the cross product of the vector from VTX1 to VTX2
      * and the vector from VTX1 to VTX3.
      */
-    Point_t normal;
+    Vect_t normal;
 } Triangle_t;
 
+/**
+ * Function: Triangle_barycentricPosition
+ *
+ * Gets the barycentric coordinates of a point relative to this triangle.
+ *
+ * Arguments:
+ *  pThis   -   const <Triangle_t>* : The triangle.
+ *  opBarry -   <Point_t>* : Pointer to the output object to hold the barycentric equations.
+ *              This co-ops the X, Y, and Z coordinates of the <Point_t> struct to hold the barycentric
+ *              coordinates relative to the first, second, and third vertices of the triangle,
+ *              respectively.
+ *  opPoint -   The point to get the barycentric coordinates of.
+ */
 Point_t * Triangle_barycentricPosition(const Triangle_t *pThis, Point_t *opBarry, const Point_t *opPoint);
 
 /**
@@ -69,8 +84,9 @@ Triangle_t* Triangle_clone(const Triangle_t *pRhs);
 /**
  * Function: Triangle_getColor
  * Determines the color of the triangle at the specified point. The color is simply the average
- * of the colors of the triangles vertices, weighted by distance to the vertex. This assumes but
- * does not require that the point is on the triangle.
+ * of the colors of the triangles vertices, weighted by the barycentric coordinates of the
+ * point relative to the triangle. This assumes but does not require that the point is on the
+ * triangle.
  *
  * The resulting color is placed in <opColor>.
  *
@@ -106,9 +122,16 @@ Color_t * Triangle_getColor(const Triangle_t *pThis, Color_t *opColor, const Poi
  */
 double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect);
 
+/**
+ * Function: Triangle_isInside
+ * Checks if the given point is inside or outisde the triangle, assuming the point is actually
+ * on the plane. If it is not on the plane, all bets are off.
+ */
+bool Triangle_isInside(const Triangle_t *const pThis, const Point_t *const pPt);
+
+
+
+
 #endif
 //end inclusion filter
-
-
-
 
