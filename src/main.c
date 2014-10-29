@@ -165,7 +165,19 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
  */
 static gboolean draw(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
-    const Scene_t *const scene = (const Scene_t*)(data);
+    const GdkPixbuf *const pixbuf = (const GdkPixbuf*)(data);
+    const int width = gdk_pixbuf_get_width(pixbuf);
+    const int height = gdk_pixbuf_get_height(pixbuf);
+
+    //Draw the pixbuf to the window.
+    gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
+
+    return TRUE;
+}
+
+void show_scene(const Scene_t *const scene)
+{
+    GtkWidget *window;
     const int width = scene->img_width;
     const int height = scene->img_height;
 
@@ -175,30 +187,16 @@ static gboolean draw(GtkWidget *widget, GdkEventExpose *event, gpointer data)
     g_assert(gdk_pixbuf_get_width(pixbuf) == width);
     g_assert(gdk_pixbuf_get_height(pixbuf) == height);
 
-    //Draw on in.
+    //Draw on it.
     render_scene(pixbuf, scene);
-    
 
-    //Draw it to the window.
-    gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
-
-    return TRUE;
-}
-
-//TODO: Would love to allow a const Scene_t here, so scenes can be built at compile time and left in ROM.
-// but the g_signal_connect complains about passing const, and I don't like casting const to non-const.
-void show_scene(Scene_t *const scene)
-{
-    GtkWidget *window;
-    
-    //Creat the GTK window.
+    //Create the GTK window.
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), scene->img_width, scene->img_height);
     gtk_window_set_title (GTK_WINDOW (window), "Ray Trace");
 
     //Connect it to the expose event, to actually do the drawing.
-    //TODO: Can probably create and draw the pixbuf once, just need to draw it to the window in the callback.
-    g_signal_connect(G_OBJECT(window), "expose_event", G_CALLBACK(draw), scene);
+    g_signal_connect(G_OBJECT(window), "expose_event", G_CALLBACK(draw), pixbuf);
 
     //Connect to destroy signal so we can quit when the window closes.
     g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
