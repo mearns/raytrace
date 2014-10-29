@@ -122,6 +122,8 @@ Color_t * Triangle_getColor(const Triangle_t *pThis, Color_t *opColor, const Poi
  */
 double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect);
 
+double Triangle_rayCast(const Triangle_t *pThis, Color_t *opColor, const double closest_dist, const Point_t *const pt, const Vect_t *const vect);
+
 /**
  * Function: Triangle_isInside
  * Checks if the given point is inside or outisde the triangle, assuming the point is actually

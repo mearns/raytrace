@@ -68,12 +68,11 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 {
     unsigned int i, j;
     Frame_t frame;
-    double distance, min_dist;
-    Color_t render_color, test_color;
+    double min_dist;
+    Color_t render_color;
     const Triangle_t *const *pTriangle;
     guchar *scanline;
     guchar *pix;
-    double frame_dist;
 
     //The point we cast rays through.
     Point_t pt;
@@ -116,22 +115,13 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
             //Get the vector from the eye to the current point.
             Point_displacement(&ray, scene->eye, &pt);
 
-            //And the distance from the eye to the frame, so we can make sure not to render
-            // anything on the wrong side of the frame.
-            frame_dist = Vect_magnitude(&ray);
-
             //Find which triangle it intersect withs closest.
             min_dist = INFINITY;
             Color_cfg(&render_color, 0, 0, 0);
             pTriangle = scene->triangles;
             for(pTriangle = scene->triangles; *(pTriangle) != NULL; pTriangle++)
             {
-                distance = Triangle_intersect(*pTriangle, &test_color, scene->eye, &ray);
-
-                if (distance >= frame_dist && distance < min_dist) {
-                    Color_copy(&render_color, &test_color);
-                    min_dist = distance;
-                }
+                min_dist = Triangle_rayCast(*pTriangle, &render_color, min_dist, &pt, &ray);
             }
 
             //Set the pixel in the GdkPixbuf.
