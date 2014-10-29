@@ -31,6 +31,65 @@ static Color_t * Triangle_getBaryColor(const Triangle_t *const pThis, Color_t *c
     return Color_cfg(opColor, r, g, b);
 }
 
+double Triangle_rayCast(const Triangle_t *pThis, Color_t *opColor, const double closest_dist, const Point_t *const pt, const Vect_t *const vect)
+{
+    Vect_t disp;
+    Vect_t pointer;
+    Point_t intersection;
+    Point_t bary;
+
+    //A point on the plane of the triangle.
+    const Point_t *const pop = pThis->vert[0]->loc;
+
+    //Convenient handle to the plane-normal.
+    const Vect_t *const pNorm = &(pThis->normal);
+
+    // What we're doing here is intersecting a ray with a plane. 
+    // The vector is a parametric equation like: pt + t*vect, so what we're going
+    // to find is the value of t for which the ray and the plane coincide.
+    // This is done as t = (disp . norm) / (vect . norm), where disp is a vector
+    // from the start of the ray to any point on the plane.
+    
+    //Get the denominator for the distance calc.
+    const double denom = Vect_dot(vect, pNorm);
+    if (denom == 0) {
+        //Line and plane are parallel, no intersection (or infinite intersection).
+        return closest_dist;
+    }
+
+    // Finish the distance calc.
+    Point_displacement(&disp, pt, pop);
+    const double numer = Vect_dot(&disp, pNorm);
+    const double dist = numer / denom;
+
+    //If t is negative, then the intersection if "behind" the starting point of the ray, so there is no intersection.
+    // Or, if the intersection is further away than a point we've already hit with the ray, then we don't care about this
+    // one, we use the other one.
+    if(dist < 0 || dist >= closest_dist) {
+        return closest_dist;
+    }
+
+    //Pointer from pt to the intersection.
+    Vect_scale(&pointer, vect, dist);
+
+    //Point of intersection.
+    Point_translate(&intersection, pt, &pointer);
+
+    //Get the barycentric position of the intersection.
+    Triangle_barycentricPosition(pThis, &bary, &intersection);
+
+    //If any of it's components are negative, it is outside of the triangle, so no intersection.
+    if(bary.x < 0 || bary.y < 0 || bary.z < 0) {
+        return closest_dist;
+    }
+
+    //Get the color of the intersection point.
+    Triangle_getBaryColor(pThis, opColor, &bary);
+
+    //This is now the closest distance.
+    return dist;
+}
+
 double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect)
 {
     //A point on the plane of the triangle.
