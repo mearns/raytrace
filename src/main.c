@@ -27,6 +27,42 @@ typedef struct {
     int img_height;
 } Scene_t;
 
+typedef struct {
+    Point_t corner;
+    Vect_t vstep;
+    Vect_t hstep;
+} Frame_t;
+
+static void Frame_cfg(Frame_t *pThis, const Scene_t *const scene)
+{
+    Vect_t up;
+    Vect_t right;
+
+    //Create the vector pointing right as the cross product of up and pov.
+    Vect_cross(&right, scene->pov, scene->up);
+    
+    //Now make sure up is really up, i.e., perpendicular to both pov and right
+    // (because right is a cross product of pov, we know right is perpendicular to pov.
+    // The cross product of right and pov will be perp to both, so all three will be
+    // mutually perpendicular.
+    Vect_cross(&up, &right, scene->pov);
+
+    //Make up be half the height of the frame, and right be half the width.
+    Vect_setMag(&up, (scene->frame_height)*0.5);
+    Vect_setMag(&right, (scene->frame_width)*0.5);
+
+    //Get a point in the top-left corner of the frame by starting at the eye,
+    // translating to the center of the frame with pov, then translating to the top-center
+    // of the frame with up, and then translating back to the top-left corner with right.
+    Point_translate(&(pThis->corner), scene->eye, scene->pov);
+    Point_translate(&(pThis->corner), &(pThis->corner), &up);
+    Point_translateBack(&(pThis->corner), &(pThis->corner), &right);
+
+    //Now get scaled vectors that represent a single step along the grid of the frame,
+    // in each direction.
+    Vect_scale(&(pThis->vstep), &up, -1.0 / (((double)(scene->img_height)) * 0.5));
+    Vect_scale(&(pThis->hstep), &right, 1.0 / (((double)(scene->img_width)) * 0.5));
+}
 
 static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 {
