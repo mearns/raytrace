@@ -35,7 +35,7 @@
  *
  */
 #ifndef QUATS_H
-#define QuATS_H
+#define QUATS_H
 
 #include "vect.h"
 #include "point.h"

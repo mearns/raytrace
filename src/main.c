@@ -15,13 +15,9 @@
 #include "vect.h"
 #include "vertex.h"
 #include "color.h"
-#include "quats.h"
-
-#define PI 3.1415926535897932384626433832795
-#define TWO_PI 6.283185307179586476925286766559
-
-#define rads(DEGS)  ( (DEGS) * (PI / 180.0) )
-#define degs(RADS)  ( (RADS) * (180.0 / PI) )
+#include "quat.h"
+#include "axes.h"
+#include "trig_helper.h"
 
 typedef struct {
     const Triangle_t *const * triangles;
@@ -203,18 +199,20 @@ void show_scene(Scene_t *const scene)
 
 int main(int argc, char **argv)
 {
-    /* Initialize the GTK+ and all of its supporting libraries. */
-    gtk_init (&argc, &argv);
-    gdk_init (&argc, &argv);
-
+    Point_t eye;
+    Vect_t pov, up;
     Scene_t scene;
     Triangle_t xytri, yztri, zxtri;
     const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
     Vertex_t ovtx, xvtx, yvtx, zvtx;
     Point_t opt, xpt, ypt, zpt;
     Color_t ocol, xcol, ycol, zcol;
-    Quat_t rot;
-    Vect_t rot_axis;
+    Axes_t axes;
+
+    /* Initialize the GTK+ and all of its supporting libraries. */
+    gtk_init (&argc, &argv);
+    gdk_init (&argc, &argv);
+
 
     Point_cfg(&opt, 0, 0, 0);
     Point_cfg(&xpt, 1, 0, 0);
@@ -236,14 +234,13 @@ int main(int argc, char **argv)
     Triangle_cfg(&zxtri, &ovtx, &zvtx, &xvtx);
 
 
-    Point_t eye;
-    Vect_t pov, up;
+    Axes_cfg(&axes);
+    Axes_yaw(&axes, rads(30));
+    Axes_pitch(&axes, rads(-30));
+    Axes_march(&axes, -3.0);
     
-    Point_cfg(&eye, 0, 0, -5);
-
-    //Orbit the camera about the origin.
-    Quat_rotation(&rot, Vect_cfg(&rot_axis, 0, 1, 0), rads(30));
-    Quat_rotatePoint(&rot, &eye, &eye);
+    Point_cfg(&eye, 0, 0, 0);
+    Axes_point(&axes, &eye, &eye); 
 
     //Keep it pointed at the origin, but frame-distance 1.
     Vect_setMag(Point_displacement(&pov, &eye, &opt), 1.0);
