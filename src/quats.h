@@ -51,9 +51,11 @@ Quat_t * Quat_cfg(Quat_t *pThis, double w, double x, double y, double z);
 
 Quat_t * Quat_copy(Quat_t *pThis, const Quat_t *pRhs);
 
-Quat_t * Quat(double w, double w, double y, double z);
+Quat_t * Quat(double w, double x, double y, double z);
 
 Quat_t * Quat_clone(const Quat_t *pRhs);
+
+Quat_t * Quat_zero(void);
 
 /**
  * Function: Quat_rotation
