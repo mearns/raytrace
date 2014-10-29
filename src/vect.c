@@ -97,7 +97,7 @@ Vect_t * Vect_setMag(Vect_t *pThis, double magnitude)
 {
     const double length = Vect_magnitude(pThis);
     const double scale = magnitude / length;
-    return Vect_cfg(pThis, (pRhs->x)*scale, (pRhs->y)*scale, (pRhs->z)*scale);
+    return Vect_cfg(pThis, (pThis->x)*scale, (pThis->y)*scale, (pThis->z)*scale);
 }
 
 double Vect_angle(const Vect_t *pA, const Vect_t *pB)
