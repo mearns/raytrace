@@ -27,24 +27,18 @@ typedef struct {
     int img_height;
 } Scene_t;
 
-/**
- *
- * Coordinates:
- *
- * Note that this is a right-handed coordinate system, which may be counterintuitive in some cases.
- * X is left and right, Y is up and down, Z is in and out (of the screen), but positive X
- * is **to the left**, positive Y is up, and positive Z is into the screen.
- */
-static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+
+static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 {
     unsigned int i, j;
-    const Scene_t *const scene = (const Scene_t*)(data);
-    const int width = scene->img_width;
-    const int height = scene->img_height;
     const Point_t *const eye = scene->eye;
     const Vect_t *const pov = scene->pov;
+    const int width = scene->img_width;
+    const int height = scene->img_height;
 
     //TODO: Dynamic allocation was for convenience, but all of these should be statically allocated on the stack.
+    
+    ///// Set Up the Frame
 
     //Up is a vector pointing from the center of the frame to the top of the frame.
     Vect_t *const up = Vect_clone(scene->up);
@@ -73,14 +67,9 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     Vect_t ray;
     Point_t row_start;
 
-    //Create our pix buffer.
-    GdkPixbuf * pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
-    g_assert(gdk_pixbuf_get_n_channels(pixbuf) == 3);
-    g_assert(gdk_pixbuf_get_width(pixbuf) == width);
-    g_assert(gdk_pixbuf_get_height(pixbuf) == height);
+    //// Render the Triangles ////
 
     
-    //Fill it in.
     const int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
     guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
     guchar *pix;
@@ -124,14 +113,41 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
         Point_translate(&row_start, &row_start, step_down);
     }
 
-    //Draw it to the window.
-    gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
-
     free(up);
     free(right);
     free(top_left);
     free(step_right);
     free(step_down);
+
+}
+
+
+/**
+ *
+ * Coordinates:
+ *
+ * Note that this is a right-handed coordinate system, which may be counterintuitive in some cases.
+ * X is left and right, Y is up and down, Z is in and out (of the screen), but positive X
+ * is **to the left**, positive Y is up, and positive Z is into the screen.
+ */
+static gboolean draw(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+    const Scene_t *const scene = (const Scene_t*)(data);
+    const int width = scene->img_width;
+    const int height = scene->img_height;
+
+    //Create our pix buffer.
+    GdkPixbuf * pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+    g_assert(gdk_pixbuf_get_n_channels(pixbuf) == 3);
+    g_assert(gdk_pixbuf_get_width(pixbuf) == width);
+    g_assert(gdk_pixbuf_get_height(pixbuf) == height);
+
+    //Draw on in.
+    render_scene(pixbuf, scene);
+    
+
+    //Draw it to the window.
+    gdk_draw_pixbuf(widget->window, NULL, pixbuf, 0, 0, 0, 0, width, height, GDK_RGB_DITHER_NONE, 0, 0);
 
     return TRUE;
 }
@@ -149,7 +165,7 @@ void show_scene(Scene_t *const scene)
 
     //Connect it to the expose event, to actually do the drawing.
     //TODO: Can probably create and draw the pixbuf once, just need to draw it to the window in the callback.
-    g_signal_connect(G_OBJECT(window), "expose_event", G_CALLBACK(render_scene), scene);
+    g_signal_connect(G_OBJECT(window), "expose_event", G_CALLBACK(draw), scene);
 
     //Connect to destroy signal so we can quit when the window closes.
     g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -171,9 +187,6 @@ int main(int argc, char **argv)
     Vertex_t *vert_b = Vertex(Point(0, 1, 5), Color(0, 255, 0));
     Vertex_t *vert_c = Vertex(Point(1, 0, 5), Color(0, 0, 255));
     Triangle_t *triangle = Triangle(vert_a, vert_b, vert_c);
-
-    Vertex_t *vert_d = Vertex(Point(1, 1, 5), Color(0, 0, 255));
-    Triangle_t *tri2 = Triangle(vert_b, vert_c, vert_d);
 
     const Triangle_t *const triangles[] = {triangle, NULL};
     Scene_t scene;
