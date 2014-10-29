@@ -4,6 +4,7 @@
  */
 #include "plane.h"
 #include "point.h"
+#include "vect.h"
 
 #include "util.h"
 
@@ -30,10 +31,15 @@ Plane_t * Plane_cfg(Plane_t *const pThis, double a, double b, double c, double d
     return pThis;
 }
 
+Plane_t * Plane_copy(Plane_t *pThis, const Plane_t *pRhs)
+{
+    return Plane_cfg(pThis, pRhs->a, pRhs->b, pRhs->c, pRhs->d);
+}
+
 Point_t * Plane_projectPoint(const Plane_t *const pThis, Point_t *const opProj, const Point_t *const pPoint)
 {
     Point_t pop;
-    Point_t norm;
+    Vect_t norm;
 
     //Get the normal unit vector.
     Plane_getNormal(pThis, &norm);
@@ -41,20 +47,20 @@ Point_t * Plane_projectPoint(const Plane_t *const pThis, Point_t *const opProj, 
     //Get a point on the plane.
     Plane_getPoint(pThis, &pop);
 
-    Point_t disp;
+    Vect_t disp;
     Point_displacement(&disp, &pop, pPoint);
 
-    const double dot = Point_dotProduct(&disp, &norm);
+    const double dot = Vect_dot(&disp, &norm);
 
-    Point_t scaled;
-    Point_scale(&scaled, &norm, dot);
+    Vect_t scaled;
+    Vect_scale(&scaled, &norm, dot);
 
     return Point_displacement(opProj, &scaled, pPoint);
 }
 
-Point_t * Plane_getNormal(const Plane_t *const pThis, Point_t *const opNormal)
+Vect_t * Plane_getNormal(const Plane_t *const pThis, Vect_t *const opNormal)
 {
-    return Point_cfg(opNormal, pThis->params[0], pThis->params[1], pThis->params[2]);
+    return Vect_cfg(opNormal, pThis->params[0], pThis->params[1], pThis->params[2]);
 }
 
 Point_t * Plane_getPoint(const Plane_t *const pThis, Point_t *opPoint)

@@ -13,19 +13,15 @@
 #include "point.h"
 #include "util.h"
 
-static const TriangleVertIndex_t Triangle_OtherVerts[3][2] = {
-    {VTX2, VTX3},
-    {VTX1, VTX3},
-    {VTX1, VTX2}
-};
-
-static const TriangleVertIndex_t Triangle_Sides[3][2] = {
-    //Order matters, must match Triangle_OtherVerts.
-    {VTX1, VTX3},   //(1->2), (1->3)
-    {VTX1, VTX2},   //(2->1), (2->3)
-    {VTX3, VTX2}    //(3->1), (3->2)
-};
-
+/**
+ * Function: Triangle_getBaryColor
+ * Gets the color for a point on the triangle based on it's barycentric coordinates.
+ *
+ * Arguments:
+ *  pThis   -   const <Triangle_t>* : Pointer to the triangle.
+ *  opColor -   <Color_t>* : Pointer to the object that will hold the output color.
+ *  pBary   -   const <Point_t>* : A point containing the barycentric coordinates of the point.
+ */
 static Color_t * Triangle_getBaryColor(const Triangle_t *const pThis, Color_t *const opColor, const Point_t *const pBary)
 {
     const double r = (pBary->x*(pThis->vert[0]->color->r)) + (pBary->y*(pThis->vert[1]->color->r)) + (pBary->z*(pThis->vert[2]->color->r));
@@ -35,21 +31,22 @@ static Color_t * Triangle_getBaryColor(const Triangle_t *const pThis, Color_t *c
     return Color_cfg(opColor, r, g, b);
 }
 
-double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Point_t *const vect)
+double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect)
 {
     //A point on the plane of the triangle.
     const Point_t *const pop = pThis->vert[0]->loc;
+    const Vect_t *const pNorm = &(pThis->normal);
 
-    const double denom = Point_dotProduct(vect, &(pThis->normal));
+    const double denom = Vect_dot(vect, pNorm);
     if (denom == 0) {
         //Line and plane are parallel, no intersection (or infinite intersection).
         return INFINITY;
     }
 
-    Point_t disp;
-    Point_sub(&disp, pop, pt);
+    Vect_t disp;
+    Point_displacement(&disp, pt, pop);
 
-    const double numer = Point_dotProduct(&disp, &(pThis->normal));
+    const double numer = Vector_dot(&disp, pNorm);
     const double dist = numer / denom;
 
     //Intersection if "behind" the starting point of the ray, so there is no intersection.
@@ -58,12 +55,12 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
     }
 
     //Pointer from pt to the intersection.
-    Point_t pointer;
-    Point_scale(&pointer, vect, dist);
+    Vect_t pointer;
+    Vector_scale(&pointer, vect, dist);
 
     //Point of intersection.
     Point_t intersection;
-    Point_add(&intersection, pt, &pointer);
+    Point_translate(&intersection, pt, &pointer);
 
     //Get the barycentric position of the intersection.
     Point_t bary;
@@ -80,17 +77,28 @@ double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point
     return dist;
 }
 
-static double Triangle_signedArea(const Point_t *const pNorm, const Point_t *const pA, const Point_t *const pB, const Point_t *const pC)
+/**
+ * Function: Triangle_signedArea
+ * Gets the signed area of a triangle defined by three points, relative to an orientation
+ * defining normal vector.
+ *
+ * The triangle is defined by the three point vetices, A, B, and C. The given normal vector
+ * should be (approximately) normal to the triangle and indicates what orientation is considered
+ * to have positive area versus negative area. When looking along the direction of the vector,
+ * if the vertices A, B, and C are arranged clockwise (in that order) then the are is positive,
+ * otherwise it is negative. I'm pretty sure I got that right, otherwise it's the reverse.
+ */
+static double Triangle_signedArea(const Vect_t *const pNorm, const Point_t *const pA, const Point_t *const pB, const Point_t *const pC)
 {
-    Point_t ab, ac, xp;
+    Vect_t ab, ac, xp;
 
     //Get vectors.
     Point_displacement(&ab, pA, pB);
     Point_displacement(&ac, pA, pC);
 
-    Point_crossProduct(&xp, &ab, &ac);
+    Vect_cross(&xp, &ab, &ac);
 
-    const double xpl = Point_dotProduct(&xp, pNorm);
+    const double xpl = Vect_dot(&xp, pNorm);
 
     return 0.5 * xpl;
 }

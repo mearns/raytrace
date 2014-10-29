@@ -45,6 +45,8 @@ Plane_t * Plane_clone(const Plane_t *pRhs);
  */
 Plane_t * Plane_cfg(Plane_t *pThis, double a, double b, double c, double d);
 
+Plane_t * Plane_copy(Plane_t *pThis, const Plane_t *pRhs);
+
 /**
  * Function: Plane_cfgFromThreePoints
  * Configures the Plane object to define a plane that passes through the three given points.
@@ -73,7 +75,12 @@ Point_t * Plane_getPoint(const Plane_t *const pThis, Point_t *opPoint);
  */
 Point_t * Plane_projectPoint(const Plane_t *pThis, Point_t *opProj, const Point_t *pPoint);
 
-Point_t * Plane_getNormal(const Plane_t *pThis, Point_t *opNormal);
+/**
+ * Function: Plane_getNormal
+ * Gets a vector normal to the plane. Specifically, this is the vector <a,b,c>,
+ * where the plane is defined by the parmaters a, b, c, and d.
+ */
+Point_t * Plane_getNormal(const Plane_t *pThis, Vect_t *opNormal);
 
 #endif
 //end inclusion filter

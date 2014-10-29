@@ -5,18 +5,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-/**
- * Struct: Point_t
- *
- * Defines a point in 3-D cartesian space by X, Y, and Z coordinates.
- * Can also represent a vector in three dimensions.
- */
-typedef struct {
-    double x;
-    double y;
-    double z;
-} Point_t;
-
+#include "types.h"
 
 /**
  * Function: Point_cfg
@@ -24,6 +13,11 @@ typedef struct {
  */
 Point_t * Point_cfg(Point_t * pThis,  double x,  double y,  double z);
 
+/**
+ * Function: Point_copy
+ * 
+ * Configured the given <Point_t> structure to be a copy of the given point.
+ */
 Point_t * Point_copy(Point_t * pThis,  const Point_t *pRhs);
 
 /**
@@ -44,78 +38,56 @@ Point_t * Point(double x, double y, double z);
 Point_t * Point_clone(const Point_t* pRhs);
 
 /**
+ * Function: Point_zero
+ * Dynamically allocates a <Point_t> with coordinate values all set to 0.
+ * Delegates to <Point>, so all the same notes.
+ */
+Point_t * Point_zero(void);
+
+/**
  * Function: Point_distance
  *
  * Returns the distance between two points.
  */
 double Point_distance(const Point_t *pThis, const Point_t *pOther);
 
-Point_t * Point_add(Point_t *opPoint, const Point_t *pA, const Point_t *pB);
+/**
+ * Function: Point_translate
+ * Translates a point by a vector. This is simply component-wise addition of the
+ * points components and the vectors elements. Populates the given output point
+ * with the resulting translated point.
+ *
+ * It is acceptable for the input and output <Point_t> pointers to point to the same
+ * object.
+ */
+Point_t * Point_translate(Point_t *opPoint, const Point_t *pPt, const Vect_t *pTrans);
 
 /**
- * Function: Point_sub
- * Subtracts to vectors and returns their difference. Subtracts B from A, 
- * which is the same as adding negative B to A.
- *
- * This is just a small wrapper around <Point_displacement>, switching the order
- * of the args.
+ * Function: Point_translateBack
+ * Like <Point_translate>, but translates by the negative of the given vector.
  */
-#define Point_sub(oPOINT, pA, pB)   \
-    Point_displacement((oPOINT), (pB), (pA))
+Point_t * Point_translateBack(Point_t *opPoint, const Point_t *pPt, const Vect_t *pTrans);
 
 /**
  * Function: Point_displacement
  * Get the displacement from point A to point B, and returns the displacement vector
- * as a <Point_t> object. This **does not do dynamic allocation**, you have to supply
+ * as a <Vect_t> object. This **does not do dynamic allocation**, you have to supply
  * the <opDisp> parameter as an object to store the result in. The same point is
  * returned as a convenience.
  *
  */
-Point_t * Point_displacement(Point_t *opDisp, const Point_t *pA, const Point_t *pB);
+Vect_t * Point_displacement(Vect_t *opDisp, const Point_t *pA, const Point_t *pB);
 
 /**
- * Function: Point_crossProduct
- * Interpretting the two points, A and B, as vectors, returns another Point object
- * which is the vector representing their cross product.
+ * Function: Point_position
  *
- * You must provide the <opProd> output object, the same pointer is returned as
- * a convenience, no dynamic allocation is performed.
- */
-Point_t * Point_crossProduct(Point_t *opProd, const Point_t *pA, const Point_t *pB);
-
-/**
- * Function: Point_dotProduct
- * Returns the dot product of two points.
- */
-double Point_dotProduct(const Point_t *pA, const Point_t *pB);
-
-/**
- * Function: Point_normalize
- * Configures the given point to be the unit vector of the given point.
- * Returns the pointer to the configured object as a convenience.
+ * Turns a point into a vector. 
  *
- * It is acceptable for <opNormal> and <pRhs> to point to the same struct.
+ * Gets the _position vector_ of the given point, which is the vector pointing
+ * from the origin, (0,0,0), to the point. This is a vector whose elements are
+ * equal to the corresponding components of the point.
  */
-Point_t * Point_normalize(Point_t *opNormal, const Point_t *const pRhs);
-
-/**
- * Function: Point_length
- * Returns the length of the vector represented by the given Point.
- */
-double Point_length(const Point_t *pThis);
-
-/**
- * Function: Point_scale
- * Configures the given point to be a scaled version of the right-hand point.
- * It is acceptable for both points to be the same.
- */
-Point_t * Point_scale(Point_t *pThis, const Point_t *pRhs, double scale);
-
-/**
- * Function: Point_vectorAngle
- * Returns the smaller of the two angles between the two vectors, in radians.
- */
-double Point_vectorAngle(const Point_t *pA, const Point_t *pB);
+Vect_t * Point_position(Vect_t *opVect, const Point_t *pPt);
 
 #endif
 //end inclusion filter

@@ -98,13 +98,13 @@ Color_t * Triangle_getColor(const Triangle_t *pThis, Color_t *opColor, const Poi
  *              of the triangle at the point of intersection, **if and only if* the ray intersects
  *              the triangle. Otherwise this object will not be touched.
  *  pt      -   const <Point_t>* : The starting point of the ray.
- *  vect    -   const <Point_t>* : The vector describing the direction of the ray
+ *  vect    -   const <Vect_t>* : The vector describing the direction of the ray
  *
  * Returns:
  *  A double indicating the distance from <pt> (the start of the ray) to the point of intersection,
  *  or <INFINITY> (from "math.h") if the ray does not intersect the triangle.
  */
-double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Point_t *const vect);
+double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect);
 
 #endif
 //end inclusion filter

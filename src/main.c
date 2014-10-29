@@ -12,14 +12,15 @@
 
 #include "triangle.h"
 #include "point.h"
+#include "vect.h"
 #include "vertex.h"
 #include "color.h"
 
 typedef struct {
     const Triangle_t *const * triangles;
     const Point_t *eye;
-    const Point_t *pov;
-    const Point_t *up;
+    const Vect_t *pov;
+    const Vect_t *up;
     double frame_width;
     double frame_height;
     int img_width;
@@ -41,35 +42,35 @@ static gboolean render_scene(GtkWidget *widget, GdkEventExpose *event, gpointer 
     const int width = scene->img_width;
     const int height = scene->img_height;
     const Point_t *const eye = scene->eye;
-    const Point_t *const pov = scene->pov;
+    const Vect_t *const pov = scene->pov;
 
     //TODO: Dynamic allocation was for convenience, but all of these should be statically allocated on the stack.
 
     //Up is a vector pointing from the center of the frame to the top of the frame.
-    Point_t *const up = Point_clone(scene->up);
+    Vect_t *const up = Vect_clone(scene->up);
     
     //And right is a vector from the center of the frame to the right edge.
-    Point_t *const right = Point_crossProduct(Point(0,0,0), pov, up);
-    Point_normalize(right, right);
-    Point_scale(right, right, scene->frame_width/2.0);
+    Vect_t *const right = Vect_cross(Vect_zero(), pov, up);
+    Vect_normalize(right, right);
+    Vect_scale(right, right, scene->frame_width/2.0);
 
     // Make sure up is really up, i.e., really perpindicular to pov (and right).
-    Point_crossProduct(up, right, pov);
-    Point_normalize(up, up);
-    Point_scale(up, up, scene->frame_height/2.0);
+    Vect_cross(up, right, pov);
+    Vect_normalize(up, up);
+    Vect_scale(up, up, scene->frame_height/2.0);
 
     //This is a point in the top-left corner of the frame.
-    Point_t *const top_left = Point_add(Point(0,0,0), eye, pov);    //To center of frame.
-    Point_add(top_left, top_left, up);    //To top of frame.
-    Point_sub(top_left, top_left, right);   //To top-left corner.
+    Point_t *const top_left = Point_translate(Point_zero(), eye, pov);    //To center of frame.
+    Point_translate(top_left, top_left, up);    //To top of frame.
+    Point_translateBack(top_left, top_left, right);   //To top-left corner.
 
     //Step by one pixel in each direction.
-    Point_t *const step_right = Point_scale(Point(0,0,0), right, 1.0 / ((double)(width) * 0.5));
-    Point_t *const step_down = Point_scale(Point(0,0,0), up, -1.0 / ((double)(height) * 0.5));
+    Vect_t *const step_right = Vect_scale(Vect_zero(), right, 1.0 / ((double)(width) * 0.5));
+    Vect_t *const step_down = Vect_scale(Vect_zero(), up, -1.0 / ((double)(height) * 0.5));
 
     //The point we cast rays through.
     Point_t pt;
-    Point_t ray;
+    Vect_t ray;
     Point_t row_start;
 
     //Create our pix buffer.
