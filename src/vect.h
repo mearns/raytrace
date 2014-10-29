@@ -110,6 +110,17 @@ Vect_t * Vect_normalize(Vect_t *opNormal, const Vect_t *const pRhs);
 Vect_t * Vect_scale(Vect_t *pThis, const Vect_t *pRhs, double scale);
 
 /**
+ * Function: Vect_setMag
+ * Sets the magnitude of the vector without changing it's direction (unless of course
+ * the magnitude is negative).
+ *
+ * This is functionally equivalent to normalizing the vector with <Vect_normalize>
+ * and then scaling it by the desired magnitude with <Vect_scale>. But it's faster to
+ * do it this way.
+ */
+Vect_t * Vect_setMag(Vect_t *pThis, double magnitude);
+
+/**
  * Function: Vect_angle
  * Returns the smaller of the two angles between the two vectors, in radians.
  *
