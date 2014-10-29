@@ -28,9 +28,9 @@ typedef struct {
 } Scene_t;
 
 typedef struct {
-    Point_t corner;
-    Vect_t vstep;
-    Vect_t hstep;
+    Point_t top_left;
+    Vect_t step_down;
+    Vect_t step_right;
 } Frame_t;
 
 static void Frame_cfg(Frame_t *pThis, const Scene_t *const scene)
@@ -54,72 +54,60 @@ static void Frame_cfg(Frame_t *pThis, const Scene_t *const scene)
     //Get a point in the top-left corner of the frame by starting at the eye,
     // translating to the center of the frame with pov, then translating to the top-center
     // of the frame with up, and then translating back to the top-left corner with right.
-    Point_translate(&(pThis->corner), scene->eye, scene->pov);
-    Point_translate(&(pThis->corner), &(pThis->corner), &up);
-    Point_translateBack(&(pThis->corner), &(pThis->corner), &right);
+    Point_translate(&(pThis->top_left), scene->eye, scene->pov);
+    Point_translate(&(pThis->top_left), &(pThis->top_left), &up);
+    Point_translateBack(&(pThis->top_left), &(pThis->top_left), &right);
 
     //Now get scaled vectors that represent a single step along the grid of the frame,
     // in each direction.
-    Vect_scale(&(pThis->vstep), &up, -1.0 / (((double)(scene->img_height)) * 0.5));
-    Vect_scale(&(pThis->hstep), &right, 1.0 / (((double)(scene->img_width)) * 0.5));
+    Vect_scale(&(pThis->step_down), &up, -1.0 / (((double)(scene->img_height)) * 0.5));
+    Vect_scale(&(pThis->step_right), &right, 1.0 / (((double)(scene->img_width)) * 0.5));
 }
 
 static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
 {
     unsigned int i, j;
-    const Point_t *const eye = scene->eye;
-    const Vect_t *const pov = scene->pov;
-    const int width = scene->img_width;
-    const int height = scene->img_height;
-
-    //TODO: Dynamic allocation was for convenience, but all of these should be statically allocated on the stack.
-    
-    ///// Set Up the Frame
-
-    //Up is a vector pointing from the center of the frame to the top of the frame.
-    Vect_t *const up = Vect_clone(scene->up);
-    
-    //And right is a vector from the center of the frame to the right edge.
-    Vect_t *const right = Vect_cross(Vect_zero(), pov, up);
-    Vect_normalize(right, right);
-    Vect_scale(right, right, scene->frame_width/2.0);
-
-    // Make sure up is really up, i.e., really perpindicular to pov (and right).
-    Vect_cross(up, right, pov);
-    Vect_normalize(up, up);
-    Vect_scale(up, up, scene->frame_height/2.0);
-
-    //This is a point in the top-left corner of the frame.
-    Point_t *const top_left = Point_translate(Point_zero(), eye, pov);    //To center of frame.
-    Point_translate(top_left, top_left, up);    //To top of frame.
-    Point_translateBack(top_left, top_left, right);   //To top-left corner.
-
-    //Step by one pixel in each direction.
-    Vect_t *const step_right = Vect_scale(Vect_zero(), right, 1.0 / ((double)(width) * 0.5));
-    Vect_t *const step_down = Vect_scale(Vect_zero(), up, -1.0 / ((double)(height) * 0.5));
+    Frame_t frame;
+    double distance, min_dist;
+    Color_t render_color, test_color;
+    const Triangle_t *const *pTriangle;
 
     //The point we cast rays through.
     Point_t pt;
+
+    //The ray we cast through it.
     Vect_t ray;
+
+    //The point at the beginning of the row.
     Point_t row_start;
 
-    //// Render the Triangles ////
+    const int width = scene->img_width;
+    const int height = scene->img_height;
 
+    // Set Up the Frame
+    Frame_cfg(&frame, scene);
+
+
+    //// Render the Triangles ////
     
     const int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
     guchar *const pixels = gdk_pixbuf_get_pixels(pixbuf);
     guchar *pix;
 
-    double distance, min_dist;
-    Color_t render_color, test_color;
-    const Triangle_t *const *pTriangle;
+    //First row starts with the top-left corner.
+    Point_copy(&row_start, &(frame.top_left));
 
-    Point_copy(&row_start, top_left);
+    //Iterate over each row, starting at the top and going down.
     for(j=0; j<height; j++) {
+
+        //Our point will walk along the row, starting with the first point in the row.
         Point_copy(&pt, &row_start);
-        //puts("-----");
+        
+        //Iterate over the pixels in the row, moving left to right.
         for(i=0; i<width; i++) {
-            Point_displacement(&ray, eye, &pt);
+
+            //Get the vector from the eye to the current point.
+            Point_displacement(&ray, scene->eye, &pt);
 
             //Find which triangle it intersect withs closest.
             min_dist = INFINITY;
@@ -127,33 +115,29 @@ static void render_scene(GdkPixbuf *const pixbuf, const Scene_t *const scene)
             pTriangle = scene->triangles;
             for(pTriangle = scene->triangles; *(pTriangle) != NULL; pTriangle++)
             {
-                distance = Triangle_intersect(*pTriangle, &test_color, eye, &ray);
+                distance = Triangle_intersect(*pTriangle, &test_color, scene->eye, &ray);
 
-                //TODO: Should be past the frame
+                //TODO: Should be past the frame, as well.
                 if (distance >= 0 && distance < min_dist) {
                     Color_copy(&render_color, &test_color);
                     min_dist = distance;
                 }
             }
 
+            //Set the pixel in the GdkPixbuf.
+            // TODO: We can do less math here by walking it through the raster.
             pix = pixels + (j*rowstride) + (i*3);
             pix[0] = render_color.r;
             pix[1] = render_color.g;
             pix[2] = render_color.b;
 
             //Step to the next pixel.
-            Point_translate(&pt, &pt, step_right);
+            Point_translate(&pt, &pt, &(frame.step_right));
         }
 
         //Step to the next row.
-        Point_translate(&row_start, &row_start, step_down);
+        Point_translate(&row_start, &row_start, &(frame.step_down));
     }
-
-    free(up);
-    free(right);
-    free(top_left);
-    free(step_right);
-    free(step_down);
 
 }
 
