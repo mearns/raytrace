@@ -90,52 +90,6 @@ double Triangle_rayCast(const Triangle_t *pThis, Color_t *opColor, const double 
     return dist;
 }
 
-double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect)
-{
-    //A point on the plane of the triangle.
-    const Point_t *const pop = pThis->vert[0]->loc;
-    const Vect_t *const pNorm = &(pThis->normal);
-
-    const double denom = Vect_dot(vect, pNorm);
-    if (denom == 0) {
-        //Line and plane are parallel, no intersection (or infinite intersection).
-        return INFINITY;
-    }
-
-    Vect_t disp;
-    Point_displacement(&disp, pt, pop);
-
-    const double numer = Vect_dot(&disp, pNorm);
-    const double dist = numer / denom;
-
-    //Intersection if "behind" the starting point of the ray, so there is no intersection.
-    if(dist < 0) {
-        return INFINITY;
-    }
-
-    //Pointer from pt to the intersection.
-    Vect_t pointer;
-    Vect_scale(&pointer, vect, dist);
-
-    //Point of intersection.
-    Point_t intersection;
-    Point_translate(&intersection, pt, &pointer);
-
-    //Get the barycentric position of the intersection.
-    Point_t bary;
-    Triangle_barycentricPosition(pThis, &bary, &intersection);
-
-    //If any of it's components are negative, it is outside of the triangle, so no intersection.
-    if(bary.x < 0 || bary.y < 0 || bary.z < 0) {
-        return INFINITY;
-    }
-
-    //Get the color of the intersection point.
-    Triangle_getBaryColor(pThis, opColor, &bary);
-
-    return dist;
-}
-
 /**
  * Function: Triangle_signedArea
  * Gets the signed area of a triangle defined by three points, relative to an orientation

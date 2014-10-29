@@ -98,30 +98,42 @@ Triangle_t* Triangle_clone(const Triangle_t *pRhs);
 Color_t * Triangle_getColor(const Triangle_t *pThis, Color_t *opColor, const Point_t *pPt);
 
 /**
- * Function: Triangle_intersect
+ * Function: Triangle_rayCast
+ *
+ * Performs simple ray casting of a single ray onto this triangle.
  *
  * Finds the point at which a ray intersects with this triangle, and returns the distance from the start
  * of the ray to the point of intersection, as well as populating the <opColor> buffer object with 
  * the color of the triangle at the point of intersection (as with <Triangle_getColor>).
  *
- * Returns <INFINITY> if there is no intersection between the ray and the triangle, which includes if the
- * ray is parallel to the triangle, if the ray intersects the plane of the tiangle but not the triangle itself,
- * or if the triangle is "behind" the ray.
+ * This stops if the point of intersection with this triangle is further than the specified
+ * <closest_dist>, does not modify <opColor> at all, and returns <closest_dist> back again.
+ * The same applies if the ray does not intersect this triangle, including the case where
+ * the presumed point of intersection would actually be _behind_ the starting point of the ray,
+ * relative to the direction of the ray.
+ *
+ * The way to use this is to initialize a <Color_t> object as black (or whatever your scene's
+ * background color is) and a variable called "closest_dist" of type double to <INFINITY>.
+ * Invoke this method on each of the triangles in your scene, passing in "closest_dist"
+ * and the <Color_t> buffer object, and assigning the resulting value as the new value of
+ * "closest_dist". If any of the triangles intersect the ray, then the Color object will be set
+ * appropriately for the closest intersection. Otherwise it will be left alone and remain the
+ * background color.
  *
  * Arguments:
  *  pThis   -   const <Triangle_t>* : the triangle with which to intersect the ray.
  *  opColor -   <Color_t>* : Pointer to a color object which will be populated with the color
- *              of the triangle at the point of intersection, **if and only if* the ray intersects
- *              the triangle. Otherwise this object will not be touched.
+ *              of the triangle at the point of intersection, **if and only if** the ray intersects
+ *              the triangle at a distance closer than <closest_dist>. Otherwise this object will not
+ *              be touched.
+ *  closest_dist    -   double : The current closest distance of intersection with other models.
+ *                      If the point of intersection with this triangle is further than this, then
+ *                      it will be treated as no intersection, since it is obscured by a closer model.
+ *                      You should generally initialize this to <INFINITY> (from math.h).
  *  pt      -   const <Point_t>* : The starting point of the ray.
  *  vect    -   const <Vect_t>* : The vector describing the direction of the ray
  *
- * Returns:
- *  A double indicating the distance from <pt> (the start of the ray) to the point of intersection,
- *  or <INFINITY> (from "math.h") if the ray does not intersect the triangle.
  */
-double Triangle_intersect(const Triangle_t *pThis, Color_t *opColor, const Point_t *const pt, const Vect_t *const vect);
-
 double Triangle_rayCast(const Triangle_t *pThis, Color_t *opColor, const double closest_dist, const Point_t *const pt, const Vect_t *const vect);
 
 /**
