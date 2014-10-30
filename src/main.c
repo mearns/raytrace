@@ -43,6 +43,11 @@ void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect
     Vect_t tptr, bptr;
     Vect_t hinge;
 
+    Color_t colors[3];
+    Color_cfg(&colors[0], 255, 0, 0);
+    Color_cfg(&colors[1], 0, 255, 0);
+    Color_cfg(&colors[2], 0, 0, 255);
+
     //Pointer to the first vertex in the top row.
     Vect_copy(&tptr, pFirst);
 
@@ -64,12 +69,12 @@ void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect
     {
         //fill in the top row of vertices
         Point_translate(&(pThis->points[2*i]), pCenter, &tptr);
-        Color_cfg(&(pThis->colors[2*i]), 255, 0, 0);
+        Color_copy(&(pThis->colors[2*i]), &(colors[i%3]));
         Vertex_cfg(&(pThis->verts[2*i]), &(pThis->points[2*i]), &(pThis->colors[2*i]));
 
         //And the bottom row.
         Point_translate(&(pThis->points[2*i+1]), pCenter, &bptr);
-        Color_cfg(&(pThis->colors[2*i+1]), 0, 255, 0);
+        Color_copy(&(pThis->colors[2*i+1]), &(colors[(i+1)%3]));
         Vertex_cfg(&(pThis->verts[2*i+1]), &(pThis->points[2*i+1]), &(pThis->colors[2*i+1]));
 
         //Rotate around to the next triangle.
