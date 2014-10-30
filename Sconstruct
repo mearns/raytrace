@@ -36,7 +36,7 @@ env = Environment(
 #Set the CCFLAGS and LINKFLAGS construction vars, used to build the command lines
 # for compiling C files and linking object files.
 #Get all warnings.
-env.Append(CCFLAGS=' -Wall')    
+env.Append(CCFLAGS=' -Wall -g')
 #Use parse the output of pkg-config to add additinoal CCFLAGS and LINKFLAGS needed
 # to build gtk apps.
 env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')

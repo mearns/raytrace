@@ -30,6 +30,61 @@ typedef struct {
 } Scene_t;
 
 typedef struct {
+    Triangle_t triangles[12];
+    Point_t points[2*12];
+    Color_t colors[2*12];
+    Vertex_t verts[2*12];
+} TriRing12_t;
+
+void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect_t *pFirst, const Vect_t *pUp, const double height_angle)
+{
+    unsigned int i;
+    Quat_t rot;
+    Vect_t tptr, bptr;
+    Vect_t hinge;
+
+    //Pointer to the first vertex in the top row.
+    Vect_copy(&tptr, pFirst);
+
+    //Axis to rotate the top pointer around to get the bottom pointer.
+    Vect_cross(&hinge, pFirst, pUp);
+
+    //Quat to rotate around the hinge.
+    Quat_rotation(&rot, &hinge, height_angle);
+
+    //Pointer to the first vertex in the bottom row.
+    Quat_rotateVect(&rot, &bptr, &tptr);
+    Quat_rotation(&rot, pUp, TWO_PI/24.0);
+    Quat_rotateVect(&rot, &bptr, &bptr);
+    
+    //Quat to rotate around the up axis.
+    Quat_rotation(&rot, pUp, TWO_PI/12.0);
+
+    for(i=0; i<12; i++)
+    {
+        //fill in the top row of vertices
+        Point_translate(&(pThis->points[2*i]), pCenter, &tptr);
+        Color_cfg(&(pThis->colors[2*i]), 255, 0, 0);
+        Vertex_cfg(&(pThis->verts[2*i]), &(pThis->points[2*i]), &(pThis->colors[2*i]));
+
+        //And the bottom row.
+        Point_translate(&(pThis->points[2*i+1]), pCenter, &bptr);
+        Color_cfg(&(pThis->colors[2*i+1]), 0, 255, 0);
+        Vertex_cfg(&(pThis->verts[2*i+1]), &(pThis->points[2*i+1]), &(pThis->colors[2*i+1]));
+
+        //Rotate around to the next triangle.
+        Quat_rotateVect(&rot, &tptr, &tptr);
+        Quat_rotateVect(&rot, &bptr, &bptr);
+    }
+
+    for(i=0; i<12; i++)
+    {
+        //And the triangle.
+        Triangle_cfg(&(pThis->triangles[i]), &(pThis->verts[2*i]), &(pThis->verts[2*((i+1)%12)]), &(pThis->verts[2*i+1]));
+    }
+}
+
+typedef struct {
     Point_t top_left;
     Vect_t step_down;
     Vect_t step_right;
@@ -207,19 +262,34 @@ void show_scene(const Scene_t *const scene)
 
 int main(int argc, char **argv)
 {
+    unsigned int i;
     Point_t opt, xpt, ypt, zpt;
     Color_t ocol, xcol, ycol, zcol;
     Vertex_t ovtx, xvtx, yvtx, zvtx;
     Triangle_t xytri, yztri, zxtri;
-    const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
+    //const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
+    const Triangle_t *triangles[13];
     Camera_t cam;
     Scene_t scene;
+    TriRing12_t ring;
+    Point_t ring_center;
+    Vect_t ring_up, ring_first;
 
     /* Initialize the GTK+ and all of its supporting libraries. */
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
 
+    //Set up the ring.
+    Point_cfg(&ring_center, 0, 0, 0);
+    Vect_cfg(&ring_first, 0, 0, 2);
+    Vect_cfg(&ring_up, 0, 1, 0);
+    TriRing12_cfg(&ring, &ring_center, &ring_first, &ring_up, rads(20));
+    for(i=0; i<12; i++) {
+        triangles[i] = &(ring.triangles[i]);
+    }
+    triangles[12] = NULL;
 
+    //Setup some triangles.
     Point_cfg(&opt, 0, 0, 0);
     Point_cfg(&xpt, 1, 0, 0);
     Point_cfg(&ypt, 0, 1, 0);
@@ -241,10 +311,10 @@ int main(int argc, char **argv)
 
 
     Camera_cfg(&cam, 1.0);
-    Camera_yaw(&cam, rads(30));
-    Camera_pitch(&cam, rads(-30));
-    Camera_roll(&cam, rads(30));
-    Camera_march(&cam, -3.0);
+    //Camera_yaw(&cam, rads(30));
+    Camera_pitch(&cam, rads(50));
+    //Camera_roll(&cam, rads(30));
+    Camera_march(&cam, -5.0);
     
     scene.triangles = triangles;
     scene.cam = &cam;
