@@ -30,7 +30,7 @@ typedef struct {
 } Scene_t;
 
 typedef struct {
-    Triangle_t triangles[12];
+    Triangle_t triangles[2*12];
     Point_t points[2*12];
     Color_t colors[2*12];
     Vertex_t verts[2*12];
@@ -80,7 +80,8 @@ void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect
     for(i=0; i<12; i++)
     {
         //And the triangle.
-        Triangle_cfg(&(pThis->triangles[i]), &(pThis->verts[2*i]), &(pThis->verts[2*((i+1)%12)]), &(pThis->verts[2*i+1]));
+        Triangle_cfg(&(pThis->triangles[2*i]), &(pThis->verts[2*i]), &(pThis->verts[2*((i+1)%12)]), &(pThis->verts[2*i+1]));
+        Triangle_cfg(&(pThis->triangles[2*i+1]), &(pThis->verts[2*i+1]), &(pThis->verts[2*((i+1)%12)]), &(pThis->verts[2*((i+1)%12)+1]));
     }
 }
 
@@ -268,7 +269,7 @@ int main(int argc, char **argv)
     Vertex_t ovtx, xvtx, yvtx, zvtx;
     Triangle_t xytri, yztri, zxtri;
     //const Triangle_t *const triangles[] = {&xytri, &yztri, &zxtri, NULL};
-    const Triangle_t *triangles[13];
+    const Triangle_t *triangles[25];
     Camera_t cam;
     Scene_t scene;
     TriRing12_t ring;
@@ -284,10 +285,10 @@ int main(int argc, char **argv)
     Vect_cfg(&ring_first, 0, 0, 2);
     Vect_cfg(&ring_up, 0, 1, 0);
     TriRing12_cfg(&ring, &ring_center, &ring_first, &ring_up, rads(20));
-    for(i=0; i<12; i++) {
+    for(i=0; i<24; i++) {
         triangles[i] = &(ring.triangles[i]);
     }
-    triangles[12] = NULL;
+    triangles[24] = NULL;
 
     //Setup some triangles.
     Point_cfg(&opt, 0, 0, 0);
@@ -312,7 +313,7 @@ int main(int argc, char **argv)
 
     Camera_cfg(&cam, 1.0);
     //Camera_yaw(&cam, rads(30));
-    Camera_pitch(&cam, rads(50));
+    Camera_pitch(&cam, rads(20));
     //Camera_roll(&cam, rads(30));
     Camera_march(&cam, -5.0);
     
