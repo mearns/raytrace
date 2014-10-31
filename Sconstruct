@@ -1,12 +1,31 @@
 #! /usr/bin/env python
 # vim: set fileencoding=utf-8: set encoding=utf-8:
 
+'''
+    In order to build this sucker, you need as a minimum these downloads:
+    1. GTK+ 2 libraries, which you can get from here if your os doesn't have a package manager
+        that will fetch them for you (eg win32):
+        http://www.gtk.org/download/win32.php , specifically
+        http://win32builder.gnome.org/packages/3.6/gtk+-dev_3.6.4-1_win32.zip
+        You'll also need a slew of dependencies for GTK+ 2 to work. I suggest downloading the
+        bundle dist:
+        http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.10-20120208_win32.zip
+    3. pkg-config, same as above, or specifically
+        http://win32builder.gnome.org/packages/3.6/pkg-config_0.28-1_win32.zip
+        
+    You'll also want to set the environment variable "PKG_CONFIG_PATH" to the directory containing
+    the *.pc files for GTK+ 2, and also add to path the necessary executables. See 'scons_win.bat'
+    for an example.
+'''
 
 ######## This is the setup
 
 import os
 
 #Create the build environment
+if 'PKG_CONFIG_PATH' not in os.environ:
+    print 'Error- you need to set "PKG_CONFIG_PATH" for this build to work'
+    exit(-1)
 env = Environment(
     #Set up the system environment variables that will be used in the processes that are launched
     # to actually do the builds.
