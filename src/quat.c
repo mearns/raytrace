@@ -127,9 +127,9 @@ Vect_t * Quat_rotateVect(const Quat_t *pThis, Vect_t *opRotated, const Vect_t *p
 
 Vertex_t * Quat_rotateVertexInPlace(const Quat_t *pThis, Vertex_t *pVertex)
 {
-    double coords[3] = {pVertex->loc->x, pVertex->loc->y, pVertex->loc->z};
+    double coords[3] = {pVertex->loc.x, pVertex->loc.y, pVertex->loc.z};
     Quat_rotateTuple(pThis, coords);
-    Point_cfg(pVertex->loc, coords[0], coords[1], coords[2]);
+    Point_cfg(&(pVertex->loc), coords[0], coords[1], coords[2]);
     return pVertex;
 }
 

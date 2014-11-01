@@ -10,8 +10,8 @@
 
 Vertex_t * Vertex_cfg(Vertex_t *pThis, Point_t *loc, Color_t *color)
 {
-    pThis->loc = loc;
-    pThis->color = color;
+    Point_copy(&(pThis->loc), loc);
+    Color_copy(&(pThis->color), color);
     return pThis;
 }
 
@@ -31,7 +31,7 @@ Vertex_t * Vertex_clone(const Vertex_t *pRhs)
 
 Vertex_t * Vertex_deepClone(const Vertex_t *pRhs)
 {
-    return Vertex(Point_clone(pRhs->loc), Color_clone(pRhs->color));
+    return Vertex(Point_clone(&(pRhs->loc)), Color_clone(&(pRhs->color)));
 }
 
 

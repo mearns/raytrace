@@ -14,8 +14,8 @@
  * and a <color> (a <Color_t>).
  */
 typedef struct {
-    Point_t *loc;
-    Color_t *color;
+    Point_t loc;
+    Color_t color;
 } Vertex_t;
 
 /**
