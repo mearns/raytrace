@@ -31,9 +31,6 @@ typedef struct {
 
 typedef struct {
     Triangle_t triangles[2*12];
-    Point_t points[2*12];
-    Color_t colors[2*12];
-    Vertex_t verts[2*12];
 } TriRing12_t;
 
 void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect_t *pFirst, const Vect_t *pUp, const double height_angle)
@@ -42,6 +39,9 @@ void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect
     Quat_t rot;
     Vect_t tptr, bptr;
     Vect_t hinge;
+    Point_t pt;
+    Color_t col;
+    Vertex_t verts[24];
 
     Color_t colors[3];
     Color_cfg(&colors[0], 255, 0, 0);
@@ -68,14 +68,14 @@ void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect
     for(i=0; i<12; i++)
     {
         //fill in the top row of vertices
-        Point_translate(&(pThis->points[2*i]), pCenter, &tptr);
-        Color_copy(&(pThis->colors[2*i]), &(colors[i%3]));
-        Vertex_cfg(&(pThis->verts[2*i]), &(pThis->points[2*i]), &(pThis->colors[2*i]));
+        Point_translate(&pt, pCenter, &tptr);
+        Color_copy(&col, &(colors[i%3]));
+        Vertex_cfg(&(verts[2*i]), &pt, &col);
 
         //And the bottom row.
-        Point_translate(&(pThis->points[2*i+1]), pCenter, &bptr);
-        Color_copy(&(pThis->colors[2*i+1]), &(colors[(i+1)%3]));
-        Vertex_cfg(&(pThis->verts[2*i+1]), &(pThis->points[2*i+1]), &(pThis->colors[2*i+1]));
+        Point_translate(&pt, pCenter, &bptr);
+        Color_copy(&col, &(colors[(i+1)%3]));
+        Vertex_cfg(&(verts[2*i+1]), &pt, &col);
 
         //Rotate around to the next triangle.
         Quat_rotateVect(&rot, &tptr, &tptr);
@@ -85,8 +85,8 @@ void TriRing12_cfg(TriRing12_t *const pThis, const Point_t * pCenter, const Vect
     for(i=0; i<12; i++)
     {
         //And the triangle.
-        Triangle_cfg(&(pThis->triangles[2*i]), &(pThis->verts[2*i]), &(pThis->verts[2*((i+1)%12)]), &(pThis->verts[2*i+1]));
-        Triangle_cfg(&(pThis->triangles[2*i+1]), &(pThis->verts[2*i+1]), &(pThis->verts[2*((i+1)%12)]), &(pThis->verts[2*((i+1)%12)+1]));
+        Triangle_cfg(&(pThis->triangles[2*i]), &(verts[2*i]), &(verts[2*((i+1)%12)]), &(verts[2*i+1]));
+        Triangle_cfg(&(pThis->triangles[2*i+1]), &(verts[2*i+1]), &(verts[2*((i+1)%12)]), &(verts[2*((i+1)%12)+1]));
     }
 }
 
