@@ -24,9 +24,9 @@
  */
 static Color_t * Triangle_getBaryColor(const Triangle_t *const pThis, Color_t *const opColor, const Point_t *const pBary)
 {
-    const double r = (pBary->x*(pThis->vert[0]->color.r)) + (pBary->y*(pThis->vert[1]->color.r)) + (pBary->z*(pThis->vert[2]->color.r));
-    const double g = (pBary->x*(pThis->vert[0]->color.g)) + (pBary->y*(pThis->vert[1]->color.g)) + (pBary->z*(pThis->vert[2]->color.g));
-    const double b = (pBary->x*(pThis->vert[0]->color.b)) + (pBary->y*(pThis->vert[1]->color.b)) + (pBary->z*(pThis->vert[2]->color.b));
+    const double r = (pBary->x*(pThis->vert[0].color.r)) + (pBary->y*(pThis->vert[1].color.r)) + (pBary->z*(pThis->vert[2].color.r));
+    const double g = (pBary->x*(pThis->vert[0].color.g)) + (pBary->y*(pThis->vert[1].color.g)) + (pBary->z*(pThis->vert[2].color.g));
+    const double b = (pBary->x*(pThis->vert[0].color.b)) + (pBary->y*(pThis->vert[1].color.b)) + (pBary->z*(pThis->vert[2].color.b));
 
     return Color_cfg(opColor, r, g, b);
 }
@@ -39,7 +39,7 @@ double Triangle_rayCast(const Triangle_t *pThis, Color_t *opColor, const double 
     Point_t bary;
 
     //A point on the plane of the triangle.
-    const Point_t *const pop = &(pThis->vert[0]->loc);
+    const Point_t *const pop = &(pThis->vert[0].loc);
 
     //Convenient handle to the plane-normal.
     const Vect_t *const pNorm = &(pThis->normal);
@@ -128,9 +128,9 @@ bool Triangle_isInside(const Triangle_t *const pThis, const Point_t *const pPt)
 
 Point_t * Triangle_barycentricPosition(const Triangle_t *const pThis, Point_t *const opBarry, const Point_t *const pPoint)
 {
-    const Point_t *const a = &(pThis->vert[0]->loc);
-    const Point_t *const b = &(pThis->vert[1]->loc);
-    const Point_t *const c = &(pThis->vert[2]->loc);
+    const Point_t *const a = &(pThis->vert[0].loc);
+    const Point_t *const b = &(pThis->vert[1].loc);
+    const Point_t *const c = &(pThis->vert[2].loc);
 
     const double pbc = Triangle_signedArea(&(pThis->normal), pPoint, b, c);
     const double pca = Triangle_signedArea(&(pThis->normal), a, pPoint, c);
@@ -141,9 +141,9 @@ Point_t * Triangle_barycentricPosition(const Triangle_t *const pThis, Point_t *c
 
 Triangle_t* Triangle_cfg(Triangle_t *const pThis, Vertex_t *const pVertex1, Vertex_t *const pVertex2, Vertex_t *const pVertex3)
 {
-    pThis->vert[0] = pVertex1;
-    pThis->vert[1] = pVertex2;
-    pThis->vert[2] = pVertex3;
+    Vertex_copy(&(pThis->vert[0]), pVertex1);
+    Vertex_copy(&(pThis->vert[1]), pVertex2);
+    Vertex_copy(&(pThis->vert[2]), pVertex3);
 
     Vect_t u, v;
     Point_displacement(&u, &(pVertex1->loc), &(pVertex2->loc));

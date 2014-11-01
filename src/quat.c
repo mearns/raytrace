@@ -135,9 +135,9 @@ Vertex_t * Quat_rotateVertexInPlace(const Quat_t *pThis, Vertex_t *pVertex)
 
 Triangle_t * Quat_rotateTriangleInPlace(const Quat_t *pThis, Triangle_t *pTriangle)
 {
-    Quat_rotateVertexInPlace(pThis, pTriangle->vert[0]);
-    Quat_rotateVertexInPlace(pThis, pTriangle->vert[1]);
-    Quat_rotateVertexInPlace(pThis, pTriangle->vert[2]);
+    Quat_rotateVertexInPlace(pThis, &(pTriangle->vert[0]));
+    Quat_rotateVertexInPlace(pThis, &(pTriangle->vert[1]));
+    Quat_rotateVertexInPlace(pThis, &(pTriangle->vert[2]));
     return pTriangle;
 }
 

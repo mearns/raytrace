@@ -25,7 +25,7 @@ typedef enum {VTX1=0, VTX2=1, VTX3=2} TriangleVertIndex_t;
  * the colors of its vertices, weighted by the barrycentric coordinates of the point.
  */
 typedef struct {
-    Vertex_t *vert[3];
+    Vertex_t vert[3];
 
     /**
      * Field: area

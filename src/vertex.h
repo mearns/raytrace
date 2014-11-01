@@ -24,7 +24,9 @@ typedef struct {
  *
  * The given <Point_t> and <Color_t> objects are used directly, they are not copied.
  */
-Vertex_t * Vertex_cfg(Vertex_t *pThis, Point_t *loc, Color_t *color);
+Vertex_t * Vertex_cfg(Vertex_t *pThis, const Point_t *loc, const Color_t *color);
+
+Vertex_t * Vertex_copy(Vertex_t *pThis, const Vertex_t *pRhs);
 
 /**
  * Function: Vertex
@@ -32,7 +34,7 @@ Vertex_t * Vertex_cfg(Vertex_t *pThis, Point_t *loc, Color_t *color);
  *
  * Aborts the program if there is not enough memory.
  */
-Vertex_t * Vertex(Point_t *loc, Color_t *color);
+Vertex_t * Vertex(const Point_t *loc, const Color_t *color);
 
 /**
  * Function: Vertex_clone
@@ -43,15 +45,6 @@ Vertex_t * Vertex(Point_t *loc, Color_t *color);
  * As with <Vertex>, aborts the program is there isn't enough memory.
  */
 Vertex_t * Vertex_clone(const Vertex_t *pRhs);
-
-/**
- * Function: Vertex_deepClone
- *
- * Does a deep copy of the given vertex object, and returns a dynamically allocated
- * object, including new dynamically allocated <Point_t> and <Color_t> objects,
- * cloned from those of the given vertex.
- */
-Vertex_t * Vertex_deepClone(const Vertex_t *pRhs);
 
 #endif
 //end inclusion filter
