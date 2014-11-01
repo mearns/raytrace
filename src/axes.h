@@ -48,6 +48,7 @@ Axes_t * Axes_pitch(Axes_t *const pThis, const double rads);
  */
 Axes_t * Axes_roll(Axes_t *const pThis, const double rads);
 
+Axes_t * Axes_scale(Axes_t *const pThis, const double scale);
 
 /**
  * Function: Axes_march

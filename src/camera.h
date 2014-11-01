@@ -9,7 +9,22 @@
 
 typedef struct {
 
+    /**
+     * Field: axes
+     *
+     * Defines the local coordinate system and orientation of the camera.
+     * So if you scale, translate, or rotate this axes, you're moving the
+     * camera. The eye of the camera is at the origin, and the POV looks
+     * along the Z axes, with the Y axes defining up.
+     */
     Axes_t axes;
+
+    /**
+     * Field: frame_dist
+     *
+     * The distance from the eye to the frame, measured in the local
+     * coordinate system.
+     */
     double frame_dist;
 
 } Camera_t;
@@ -23,6 +38,8 @@ Point_t * Camera_getEye(const Camera_t *const pThis, Point_t *opEye);
 Vect_t * Camera_getPov(const Camera_t *const pThis, Vect_t *opPov);
 
 Vect_t * Camera_getUp(const Camera_t *const pThis, Vect_t *opUp);
+
+Camera_t * Camera_scale(Camera_t *const pThis, const double scale);
 
 Camera_t * Camera_yaw(Camera_t *const pThis, const double rads);
 

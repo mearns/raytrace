@@ -41,12 +41,21 @@ Axes_t * Axes_clone(const Axes_t *const pRhs)
     return Util_cloneOrDie(pRhs, sizeof(Axes_t), "Cloning a Axes_t object.");
 }
 
+Axes_t * Axes_scale(Axes_t *const pThis, const double scale)
+{
+    Vect_scale(&(pThis->x), &(pThis->x), scale);
+    Vect_scale(&(pThis->y), &(pThis->y), scale);
+    Vect_scale(&(pThis->z), &(pThis->z), scale);
+    return pThis;
+}
+
+
 Axes_t * Axes_yaw(Axes_t *const pThis, const double rads)
 {
     Quat_t rot;
     Quat_rotation(&rot, &(pThis->y), rads);
     Quat_rotateVect(&rot, &(pThis->x), &(pThis->x));
-    Vect_cross(&(pThis->z), &(pThis->x), &(pThis->y));
+    Quat_rotateVect(&rot, &(pThis->z), &(pThis->z));
     return pThis;
 }
 
@@ -55,7 +64,7 @@ Axes_t * Axes_pitch(Axes_t *const pThis, const double rads)
     Quat_t rot;
     Quat_rotation(&rot, &(pThis->x), rads);
     Quat_rotateVect(&rot, &(pThis->y), &(pThis->y));
-    Vect_cross(&(pThis->z), &(pThis->x), &(pThis->y));
+    Quat_rotateVect(&rot, &(pThis->z), &(pThis->z));
     return pThis;
 }
 
@@ -63,8 +72,8 @@ Axes_t * Axes_roll(Axes_t *const pThis, const double rads)
 {
     Quat_t rot;
     Quat_rotation(&rot, &(pThis->z), rads);
+    Quat_rotateVect(&rot, &(pThis->x), &(pThis->x));
     Quat_rotateVect(&rot, &(pThis->y), &(pThis->y));
-    Vect_cross(&(pThis->x), &(pThis->y), &(pThis->z));
     return pThis;
 }
 
