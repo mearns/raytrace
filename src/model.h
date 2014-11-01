@@ -10,6 +10,11 @@
 
 typedef struct Model Model_t;
 
+//TODO: Need to add a method to axes to turn a global point into a local one.
+// Then we can take an incoming ray and make it a local ray, and use that to
+// intersect all the triangles and children, then make the resulting intersection
+// global again.
+
 struct Model {
     Axes_t axes;
     Model_t *children;
