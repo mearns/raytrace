@@ -16,6 +16,8 @@
     You'll also want to set the environment variable "PKG_CONFIG_PATH" to the directory containing
     the *.pc files for GTK+ 2, and also add to path the necessary executables. See 'scons_win.bat'
     for an example.
+
+    Read `https://github.com/mearns/raytrace/wiki/dependencies`_ for detailed instructions =).
 '''
 
 ######## This is the setup
