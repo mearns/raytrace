@@ -36,6 +36,11 @@ Axes_t * Axes_copy(Axes_t *const pThis, const Axes_t *const pRhs)
     return pThis;
 }
 
+Axes_t * Axes_clone(const Axes_t *const pRhs)
+{
+    return Util_cloneOrDie(pRhs, sizeof(Axes_t), "Cloning a Axes_t object.");
+}
+
 Axes_t * Axes_scale(Axes_t *const pThis, const double scale)
 {
     Vect_scale(&(pThis->x), &(pThis->x), scale);
@@ -44,10 +49,6 @@ Axes_t * Axes_scale(Axes_t *const pThis, const double scale)
     return pThis;
 }
 
-Axes_t * Axes_clone(const Axes_t *const pRhs)
-{
-    return Util_cloneOrDie(pRhs, sizeof(Axes_t), "Cloning a Axes_t object.");
-}
 
 Axes_t * Axes_yaw(Axes_t *const pThis, const double rads)
 {
