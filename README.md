@@ -9,6 +9,9 @@ building
 =====
 win32
 -----
+
+Seriously, read https://github.com/mearns/raytrace/wiki/dependencies
+
 You'll need to download the gtk+ 2 dependencies:
 http://www.gtk.org/download/win32.php
 
