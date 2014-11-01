@@ -14,6 +14,14 @@ typedef struct Model Model_t;
 // Then we can take an incoming ray and make it a local ray, and use that to
 // intersect all the triangles and children, then make the resulting intersection
 // global again.
+//
+// The correct way to do this is to store a composite rotation quat in the axes,
+// and things like yaw and roll will compose the rotation with the existing
+// rotation, and everytime the rotation is changed, we update the axes (by applying
+// the current net rotation to standard vectors).
+//
+// Then we can translate from global to local, in part, by applying the conjugate
+// or the net rotation.
 
 struct Model {
     Axes_t axes;
