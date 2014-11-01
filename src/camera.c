@@ -40,6 +40,12 @@ Vect_t * Camera_getUp(const Camera_t *const pThis, Vect_t *opUp)
     return opUp;
 }
 
+Camera_t * Camera_scale(Camera_t *const pThis, const double scale)
+{
+    Axes_scale(&(pThis->axes), scale);
+    return pThis;
+}
+
 Camera_t * Camera_yaw(Camera_t *const pThis, const double rads)
 {
     Axes_yaw(&(pThis->axes), rads);
