@@ -23,11 +23,13 @@
 ######## This is the setup
 
 import os
+import os.path
 
-#Create the build environment
 if 'PKG_CONFIG_PATH' not in os.environ:
     print 'Error- you need to set "PKG_CONFIG_PATH" for this build to work'
     exit(-1)
+
+#Create the build environment
 env = Environment(
     #Set up the system environment variables that will be used in the processes that are launched
     # to actually do the builds.
@@ -71,6 +73,14 @@ header_files = env.Glob('src/*.h')
 
 #Build object files from source files.
 obj_files = env.Object(src_files)
+
+#Add some aliases for building individual object files.
+for obj in obj_files:
+    name = os.path.splitext(os.path.basename(obj.abspath))[0]
+    env.Alias(name, obj)
+    env.Alias(name + '.o', obj)
+    env.Alias(name + '.obj', obj)
+    env.Alias(name + '_obj', obj)
 
 #Set up a command line target-alias to build the object files (e.g., `scons obj`).
 env.Alias('obj', obj_files)
